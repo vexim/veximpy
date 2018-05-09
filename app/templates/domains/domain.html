@@ -1,0 +1,31 @@
+<!-- app/templates/domains/domain.html -->
+
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/utils.html" as utils %}
+{% extends "base.html" %}
+{% block title %}
+    {% if add_domain %}
+        Add Domain
+    {% else %}
+        Edit Domain
+    {% endif %}
+{% endblock %}
+{% block body %}
+<div class="content-section">
+ <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <div class="center">
+            {% if add_domain %}
+                <h1>Add Domain</h1>
+            {% else %}
+                <h1>Edit Domain {{ domainname }}</h1>
+            {% endif %}
+            <br/>
+            {{ wtf.quick_form(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

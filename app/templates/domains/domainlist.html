@@ -1,0 +1,156 @@
+<!-- app/templates/domainlist.html -->
+
+{% import "bootstrap/utils.html" as utils %}
+{% extends "base.html" %}
+{% block title %}Domains{% endblock %}
+{% block body %}
+<div class="content-section">
+  <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <h1 style="text-align:center;">{{ list_title }}</h1>
+        {% if domainlist %}
+          <hr class="intro-divider">
+          <div class="postition-absolute" style="text-align: center">
+            <a href="{{ url_for('domains.domains_add', domaintype=domaintype) }}" class="btn btn-default">
+              <i class="fa fa-plus"></i>
+              Add Domain
+            </a>
+          </div>
+          <div class="center table-responsive-sm">
+            <table class="table table-sm table-striped table-bordered table-hover rotate-75">
+                <caption>List of domains</caption>
+                <colgroup>
+                    <col span="1" style="width: *;">
+                    {% if domaintype=='alias' %}
+                      <col span="1" style="width: *;">
+                    {% endif %}
+                    {% if domaintype=='local' %}
+                      <col span="1" style="width: *;">
+                      <col span="1" style="width: 100px;">
+                      <col span="1" style="width: 100px;">
+                      <col span="1" style="width: 40px;">
+                      <col span="1" style="width: 40px;">
+                    {% endif %}
+                    <col span="1" style="width: 35px;">
+                    <col span="1" style="width: 35px;">
+                    <col span="1" style="width: 35px;">
+                </colgroup>
+              <thead>
+                <tr class="rotate-75">
+                  <th class="rotate-75"><div><span>Domainname</span></div></th>
+                  <!-- <th width="30%"> Maildir </th> -->
+                  {% if domaintype=='alias' %}
+                    <th class="rotate-75"><div><span>Alias for</span></div></th>
+                  {% endif %}
+                  {% if domaintype=='local' %}
+                    <th class="rotate-75"><div><span>Relay to</span></div></th>
+                    <th class="rotate-75"><div><span>Local Accounts</span></div></th>
+                    <th class="rotate-75"><div><span>Alias Accounts</span></div></th>
+                    <th class="rotate-75"><div><span>Postmasters</span></div></th>
+                    <th class="rotate-75"><div><span>Domain Aliases</span></div></th>
+                  {% endif %}
+                  <th class="rotate-75"><div><span>Enabled</span></div></th>
+                  <th class="rotate-75"><div><span>Edit</span></div></th>
+                  <th class="rotate-75"><div><span>Delete</span></div></th>
+                </tr>
+              </thead>
+              <tbody>
+              
+              {% for domain in domainlist %}
+                <tr{% if not domain.enabled %} class="disabled"{% endif %}>
+                  <td> <a id="{{ domain.domain_id }}" class="anchor-top"></a>{{ domain.domainname }} </td>
+                  {% if domaintype=='alias' %}
+                    <td>{{ domain.domain.domain }}</td>
+                  {% endif %}
+                  {% if domaintype=='local' %}
+                        <td>{{ domain.relayto }}</td>
+                        <td style="text-align:right;">
+                        {% if domain.localusers %}
+                            <a href="{{ url_for('accounts.accountlist', domainid=domain.domain_id, accounttype='local') }}">
+                                {{ domain.localusers.count() }}
+                                <i class="far fa-list-alt"></i>
+                            </a>
+                        {% else %}
+                            0
+                        {% endif %}
+                        <a href="{{ url_for('accounts.account_add', domainid=domain.domain_id, accounttype='local') }}">
+                                <i class="fas fa-user-plus"></i>
+                        </a>
+                      </td>
+                      <td style="text-align:right;">
+                        {% if domain.aliasusers %}
+                            <a href="{{ url_for('accounts.accountlist', domainid=domain.domain_id, accounttype='alias') }}">
+                                {{ domain.aliasusers.count() }}
+                                <i class="far fa-list-alt"></i>
+                            </a>
+                        {% else %}
+                            0
+                        {% endif %}
+                        <a href="{{ url_for('accounts.account_add', domainid=domain.domain_id, accounttype='alias') }}">
+                                <i class="fas fa-user-plus"></i>
+                        </a>
+                      </td>
+                      <td style="text-align:right;">
+                        {% if domain.postmasters %}
+                            {{ domain.postmasters.count() }}
+                        {% else %}
+                            0
+                        {% endif %}
+                      </td>
+                      <td style="text-align:right;">
+                        {% if domain.aliases %}
+                            {{ domain.aliases.count() }}
+                        {% else %}
+                            0
+                        {% endif %}
+                      </td>
+                  {% endif %}
+                  <td style="text-align:center;">
+                    {% if domaintype=='alias' or domain.id>1 %}
+                        <a href="{{ url_for('domains.domains_enabled', domainid=domain.id, domaintype=domaintype) }}">
+                        {% if domain.enabled %}
+                            <i class="fa fa-toggle-on"></i> 
+                        {% else %}
+                            <i class="fa fa-toggle-off"></i> 
+                        {% endif %}
+                        </a>
+                    {% else %}
+                        <i class="fa fa-toggle-on"></i>
+                    {% endif %}
+                  </td>
+                  <td style="text-align:center;">
+                    <a href="{{ url_for('domains.domains_edit', domainid=domain.id, domaintype=domaintype) }}">
+                        <i class="far fa-edit"></i>
+                    </a>
+                  </td>
+                  <td style="text-align:center;">
+                    {% if (not domain.enabled) and domain.id>1 and (not domaintype=='local' or (2>(domain.users.count() | int) and 0==(domain.aliases.count() | int))) %}
+                        <a href="{{ url_for('domains.domains_delete', domainid=domain.id, domaintype=domaintype) }}">
+                            <i class="far fa-trash-alt"></i> 
+                        </a>
+                    {% else %}
+                        <i class="far fa-trash-alt small disabled" data-toggle="tooltip" title="You can not delete an enabled domain or a domain having accounts or alises"></i>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center">
+              <h3> No domains have been added. </h3>
+              <hr class="intro-divider">
+            <a href="{{ url_for('domains.domains_add', domaintype=domaintype) }}" class="btn btn-default">
+              <i class="fa fa-plus"></i>
+              Add Domain
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

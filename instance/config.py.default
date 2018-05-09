@@ -1,0 +1,26 @@
+# instance/config.py
+# instance/config.py.default contains a template
+# copy this template to instance/config.py and modify the latter
+
+# database config
+# see http://docs.sqlalchemy.org/en/latest/core/engines.html
+VEXIMDB_DESIGNATOR	= 'mysql+pymysql'
+VEXIMDB_USER 		= ''
+VEXIMDB_PASS		= ''
+VEXIMDB_HOST		= 'localhost'
+VEXIMDB_PORT		= '3306'
+VEXIMDB_SCHEMA		= 'veximtest'		# should exist
+
+# other config
+SECRET_KEY		= ''
+
+
+# end of config
+# it should NOT be necessary to touch following:
+
+SQLALCHEMY_DATABASE_URI = VEXIMDB_DESIGNATOR + '://' \
+	+ VEXIMDB_USER + ':' + VEXIMDB_PASS \
+	+ '@' + VEXIMDB_HOST + ':' + VEXIMDB_PORT \
+	+ '/' + VEXIMDB_SCHEMA \
+	+ '?charset=utf8mb4'
+

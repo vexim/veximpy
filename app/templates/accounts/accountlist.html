@@ -1,0 +1,152 @@
+<!-- app/templates/accounts/accountlist.html -->
+
+{% import "bootstrap/utils.html" as utils %}
+{% extends "base.html" %}
+{% block title %}Domains{% endblock %}
+{% block body %}
+<div class="content-section">
+  <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <h1 style="text-align:center;">{{ list_title }}</h1>
+        {% if accountlist %}
+          <hr class="intro-divider">
+          <div class="postition-absolute" style="text-align: center">
+            <a href="{{ url_for('accounts.account_add', domainid=domainid, accounttype=accounttype) }}" class="btn btn-default">
+              <i class="fa fa-plus"></i>
+              Add Account
+            </a>
+          </div>
+          <div class="center table-responsive-sm">
+            <table class="table table-sm table-striped table-bordered table-hover rotate-75">
+                <caption>List of accounts</caption>
+                <colgroup>
+                    <col span="1" style="width: *;">
+                    <col span="1" style="width: *;">
+                    <col span="1" style="width: *;">
+                    
+                    {% if accounttype=='local' %}
+                      <col span="1" style="width: 60px;">
+                      <col span="1" style="width: 35px;">
+                      <col span="1" style="width: 35px;">
+                      <col span="1" style="width: 35px;">
+                      <col span="1" style="width: 35px;">
+                    {% endif %}
+                    {% if accounttype=='alias' %}
+                      <col span="1" style="width: 35px;">
+                    {% endif %}
+                    <col span="1" style="width: 35px;">
+                    <col span="1" style="width: 35px;">
+                    <col span="1" style="width: 35px;">
+                </colgroup>
+              <thead>
+                <tr class="rotate-75">
+                  <th class="rotate-75"><div><span>Name</span></div></th>
+                  <th class="rotate-75"><div><span>Username</span></div></th>
+                  <th class="rotate-75"><div><span>Localpart</span></div></th>
+                  <!-- <th width="30%"> Maildir </th> -->
+                  {% if accounttype=='local' %}
+                    <th class="rotate-75"><div><span>Quota [MB]</span></div></th>
+                    <th class="rotate-75"><div><span>Piped</span></div></th>
+                    <th class="rotate-75"><div><span>Forwarded</span></div></th>
+                    <th class="rotate-75"><div><span>Siteadmin</span></div></th>
+                    <th class="rotate-75"><div><span>Postmaster</span></div></th>
+                  {% endif %}
+                  {% if accounttype=='alias' %}
+                    <th class="rotate-75"><div><span>Login</span></div></th>
+                  {% endif %}
+                  <th class="rotate-75"><div><span>Enabled</span></div></th>
+                  <th class="rotate-75"><div><span>Edit</span></div></th>
+                  <th class="rotate-75"><div><span>Delete</span></div></th>
+                </tr>
+              </thead>
+              <tbody>
+              
+              {% for account in accountlist %}
+                <tr title="{{ account.comment }}">
+                  <td> <a id="{{ account.user_id }}" class="anchor-top"></a>{{ account.realname }} </td>
+                  <td> {{ account.username }} </td>
+                  <td> {{ account.localpart }} </td>
+                  
+                  {% if accounttype=='local' %}
+                  <td class="small" style="text-align:right;"> {{ account.quota }} </td>
+                    <td style="text-align:center;">
+                        {% if account.is_piped %}
+                            <i class="far fa-check-circle"></i>
+                        {% endif %}
+                      </td>
+                    <td style="text-align:center;">
+                        {% if account.on_forward %}
+                            <i class="far fa-check-circle"></i>
+                        {% endif %}
+                      </td>
+                      <td style="text-align:center;">
+                        {% if account.is_siteadmin %}
+                            <i class="far fa-check-circle"></i>
+                        {% endif %}
+                      </td>
+                      <td style="text-align:center;">
+                        {% if account.is_postmaster %}
+                            <i class="far fa-check-circle"></i>
+                        {% endif %}
+                      </td>
+                  {% endif %}
+                  {% if accounttype=='alias' %}
+                      <td style="text-align:center;">
+                        {% if account.has_password %}
+                            <i class="far fa-check-circle"></i>
+                        {% endif %}
+                      </td>
+                  {% endif %}
+                  <td style="text-align:center;">
+                    {% if not account.is_postmaster %}
+                        <a href="{{ url_for('accounts.account_enabled', accountid=account.id, accounttype=accounttype) }}">
+                        {% if account.enabled %}
+                          <i class="fa fa-toggle-on"></i> 
+                        {% else %}
+                          <i class="fa fa-toggle-off"></i> 
+                        {% endif %}
+                        </a>
+                    {% else %}
+                        {% if account.enabled %}
+                          <i class="fa fa-toggle-on disabled"></i> 
+                        {% else %}
+                          <i class="fa fa-toggle-off disabled"></i> 
+                        {% endif %}
+                    {% endif %}
+                  </td>
+                  <td style="text-align:center;">
+                    <a href="{{ url_for('accounts.account_edit', accountid=account.id, accounttype=accounttype) }}">
+                        <i class="far fa-edit"></i>
+                    </a>
+                  </td>
+                  <td style="text-align:center;" title="You can not delete an enabled account or a postmaster account">
+                    {% if (not account.enabled) and (accounttype!='local' or account.id>1) and (not account.is_postmaster or postmasterdeleteallow == 1) and (not account.is_siteadmin) %}
+                        <a href="{{ url_for('accounts.account_delete', accountid=account.id, accounttype=accounttype) }}">
+                            <i class="far fa-trash-alt"></i> 
+                        </a>
+                    {% else %}
+                        <i class="far fa-trash-alt disabled"></i>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div style="text-align: center">
+              <h3> No accounts have been added. </h3>
+              <hr class="intro-divider">
+            <a href="{{ url_for('accounts.account_add', domainid=domainid, accounttype=accounttype) }}" class="btn btn-default">
+              <i class="fa fa-plus"></i>
+              Add Account
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
