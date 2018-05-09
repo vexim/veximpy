@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 #from urllib import urlencode, quote, unquote
+from flask_debugtoolbar import DebugToolbarExtension
 
 # local imports
 from config import app_config
@@ -34,20 +35,26 @@ def require_postmaster(domainid):
             or current_user.is_siteadmin):
         abort(403)
 
-def create_app(config_name):
+def create_app(config_name,  settings_override=None):
 
     global session_domain_id
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
-    
+
+    if settings_override:
+        app.config.update(settings_override)
+
     Bootstrap(app)
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_message = "You must be logged in to access this page."
     login_manager.login_view = "auth.login"
     migrate = Migrate(app, db)
+
+    debug_toolbar = DebugToolbarExtension()
+    debug_toolbar.init_app(app)
 
     session_domain_id = 0
 

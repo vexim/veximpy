@@ -27,6 +27,7 @@ venv/
 *.tar.*
 instance/config.py
 migrations/
+**/.pytest_cache/**
 
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm

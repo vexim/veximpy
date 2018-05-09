@@ -22,6 +22,7 @@ class DevelopmentConfig(Config):
     DEBUG = 1
     TESTING = True
     SQLALCHEMY_ECHO = True
+    SERVER_NAME = 'veximpy.runout.at'
 
 class ProductionConfig(Config):
     """

@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from flask import abort
 from flask_sqlalchemy import SQLAlchemy
 from app.app import db, login_manager
-from .config.settings import settings
+from ..config.settings import settings
 from flask_login import current_user, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.context import CryptContext
