@@ -1,0 +1,59 @@
+### Nginx configuration for `veximpy`
+### * Use this file as template or just move it into the appropriate
+###   nginx configuration directory
+###   + Debian: /etc/nginx/sites-available/ and /etc/nginx/sites-enabled/
+###   + Others: /etc/nginx/conf.d/
+###  
+
+server {
+    listen 80;
+    listen 443 ssl http2;
+
+    server_name ###servername###;
+
+    ssl_certificate /etc/ssl/###servername###.pem;
+    ssl_certificate_key /etc/ssl/private/###servername###.pem;
+    ssl_stapling off;
+
+#    server_name_in_redirect on;
+    access_log /var/log/nginx/###servername###.access_log combined;
+    error_log  /var/log/nginx/###servername###.error_log;
+
+#    add_header X-Frame-Options "SAMEORIGIN" always;
+#    add_header X-Content-Type-Options "nosniff" always;
+#    add_header X-Xss-Protection "1";
+     add_header  Strict-Transport-Security "max-age=0;";
+
+#    gzip on;
+#    gzip_vary on;
+#    gzip_proxied any;
+#    gzip_types
+#        application/javascript
+#        application/json
+#        text/css
+#        text/plain
+#        image/svg+xml;
+
+    location /static/ {
+        access_log on;
+        alias ###dir###/app/static/;
+        autoindex off;
+        etag on;
+        expires 10s;
+        log_not_found on;
+
+        location ~* \.(gif|jpe?g|png|ico)$ {
+#            expires max;
+             expires 10s;
+        }
+    }
+ 
+    location / {
+#        add_header Vary "Cookie";
+        include uwsgi_params;
+        proxy_buffering off;
+	uwsgi_pass unix:/run/uwsgi/app/veximpy/socket;
+    }
+
+}
+

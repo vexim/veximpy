@@ -1,0 +1,27 @@
+[uwsgi]
+app-name	= veximpy
+base            = ###dir###/%(app-name)
+chdir		= %(base)
+pidfile    	= /run/uwsgi/app/%(app-name)/pid
+socket     	= /run/uwsgi//app/%(app-name)/socket
+#home       	= %(base)/venv
+pythonpath 	= %(base)/venv
+venv		= %(base)/venv
+
+logto      	= /var/log/uwsgi/%(app-name).log
+log-date   	= true
+
+chmod-socket    = 660
+chown-socket    = www-data:www-data
+gid             = www-data
+lazy-apps       = false
+master          = true
+module          = wsgi
+callable	= application
+processes       = 2
+#socket		= [::]:5000
+#socket		= socket
+threads         = 0
+uid             = www-data
+plugins		= python3,http
+vacuum		= true
