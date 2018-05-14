@@ -4,6 +4,17 @@ Use this code on your own risk!
 # Install & Upgrade
 
 If you get some `Duplicate index` warnings - ignore them.
+
+## Install Python3 environment
+
+Call `bash pysetup.sh`
+
+This creates a virtual environment under `venv` and modified templates for nginx and uwsgi under `doc`
+
+If a domain/server name is provided as first parameter it will be used for the nginx template. 
+
+You have to edit the file `instance/config.py`.
+
 ## Install a new vexim DB
 Create a DB and a DB user.
 
@@ -12,7 +23,9 @@ Then simply call:
 `bash dbreinit.sh <targetDBname>`
 
 This will create tables in the DB <targetDBname>.
-If \<targetDBname\> is ommited, 'veximdbtest' will be used.
+
+If \<targetDBname\> is ommited, 'veximtest' will be used.
+
 This script will copy `app/models/models_orig.py` with the \<targetDBname\> as DB to `app/models/models.py`
 
 ## Upgrade an existing vexim2 DB
@@ -28,6 +41,20 @@ You will be prompted for a target DB host, port, user and password.
 It will call the `bash dbreinit.sh <targetDBname>` script in the end.
 More information can be found inside this script file.
 
+## NGINX, UWSGI
+
+Sample files can be found under the `doc` directory.
+
+Make sure you have certificates for the domain(s)
+
+Review, edit and copy these files to `/etc/nginx/sites-available` and `/etc/uwsgi/apps-available`. Set appropriate symlinks in the *-enabled directories and restart nginx/uwsgi.
+
+# Logo per Domain
+
+Under `app/static/ressources` create a directory for every domain in your database with the Logo as SVG. The filename must be `logo.svg`
+
+Eg: `app/static/ressources/example.com/logo.svg`
+
 # Internal Notes:
 
 Create or upgrade a new database.
@@ -39,7 +66,7 @@ bash ./dbreinit.sh
 Reverse engeneering of an existing database
 
 ```
-echo "mysql passwd: "; stty -echo; read PW; stty echo; flask-sqlacodegen --flask --schema maildb_vexim2 mysql://marco69:${PW}@127.0.0.1/maildb_vexim2 | sed "s/maildb\_vexim2\.//"
+echo "mysql user: "; read USER; echo "mysql passwd: "; stty -echo; read PW; stty echo; flask-sqlacodegen --flask --schema maildb_vexim2 mysql://${USER}:${PW}@127.0.0.1/maildb_vexim2 | sed "s/maildb\_vexim2\.//"
 ```
 
 # License
