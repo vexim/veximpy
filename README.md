@@ -28,8 +28,14 @@ If \<targetDBname\> is ommited, 'veximtest' will be used.
 
 This script will copy `app/models/models_orig.py` with the \<targetDBname\> as DB to `app/models/models.py`
 
+Create the siteadmin Domain with `mysql -u <user> -p -h <host> -p <port> -e "INSERT INTO `domains` (`domain_id`, `domain`) VALUES ('1', 'site')"`
+
+Create the siteadmin User with `mysql -u <user> -p -h <host> -p <port> -e "INSERT INTO `users` (`domain_id`, `localpart`, `username`, `crypt`) VALUES ('1', 'siteadmin', 'siteadmin', '<PASSWORDHASH>')"`
+
 ## Upgrade an existing vexim2 DB
 Migration will be done to a new DB. (in-place-migration is not supported)
+
+Create a dump from your original vexim DB.
 
 Create a DB user for the new DB.
 
@@ -39,7 +45,9 @@ Then call (with 3 parameters):
 
 You will be prompted for a target DB host, port, user and password.
 It will call the `bash dbreinit.sh <targetDBname>` script in the end.
+
 More information can be found inside this script file.
+Even an example for creating a dump from your original vexim DB.
 
 ## NGINX, UWSGI
 
@@ -54,6 +62,10 @@ Review, edit and copy these files to `/etc/nginx/sites-available` and `/etc/uwsg
 Under `app/static/ressources` create a directory for every domain in your database with the Logo as SVG. The filename must be `logo.svg`
 
 Eg: `app/static/ressources/example.com/logo.svg`
+
+# Automated tests
+
+See the `app/tests` directory.
 
 # Internal Notes:
 
