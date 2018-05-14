@@ -56,6 +56,8 @@ echo "mysql -u ${USER} -pXXXXXXXXXX -h ${HOST} -P ${PORT}"
 mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "CREATE DATABASE IF NOT EXISTS ${3}"
 if [[ $? -eq 0 ]]; then
     mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} ${3} < ${1}
+    mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "UPDATE veximtest.users SET role = 64 WHERE admin=1"
+    mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "UPDATE veximtest.users SET role = 192 WHERE user_id=1"
 fi
 if [[ $? -ne 0 ]]; then
     echo "Abort after MySQL error"

@@ -14,6 +14,8 @@ class Config(object):
 
     # Put any configurations here that are common across all environments
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 class DevelopmentConfig(Config):
     """
     Development configurations
@@ -22,6 +24,7 @@ class DevelopmentConfig(Config):
     DEBUG = 1
     TESTING = True
     SQLALCHEMY_ECHO = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SERVER_NAME = 'veximpy.runout.at'
 
 class ProductionConfig(Config):

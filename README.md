@@ -1,3 +1,6 @@
+Right now lots of things are untested!
+Use this code on your own risk!
+
 # Install & Upgrade
 
 If you get some `Duplicate index` warnings - ignore them.
@@ -38,3 +41,21 @@ Reverse engeneering of an existing database
 ```
 echo "mysql passwd: "; stty -echo; read PW; stty echo; flask-sqlacodegen --flask --schema maildb_vexim2 mysql://marco69:${PW}@127.0.0.1/maildb_vexim2 | sed "s/maildb\_vexim2\.//"
 ```
+
+# License
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301, USA.
+
+

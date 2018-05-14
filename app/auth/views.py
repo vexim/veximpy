@@ -7,7 +7,7 @@ from markupsafe import Markup
 from . import auth
 from .forms import LoginForm
 #from app.app import db, session_domain_id
-from ..models.models import User
+from ..models.models import User,  Domain
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,7 +48,7 @@ def login():
                 if try_login(user=user):
                     break
                 # compare with localpart and domain fields and try login
-                user = User.query.filter(User.localpart==form.username.data, User.domains.domain==domainname).one_or_none()
+                user = User.query.filter(User.localpart==form.username.data, User.domainname==domainname).one_or_none()
                 # break if we have found the user or if we reached the main domain
                 if try_login(user=user) or domainname.count('.') == 1:
                     break
