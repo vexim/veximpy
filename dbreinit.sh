@@ -1,11 +1,17 @@
 #!/bin/bash
 
-SQL_SCHEMA="veximtest"
+MODELS="$(dirname ${0})/app/models/models.py"
+MODELS_ORIG="$(dirname ${0})/app/models/models_orig.py"
 
+if [[ -z "${1}" ]]; then
+    SQL_SCHEMA="veximtest"
+else
+    SQL_SCHEMA="${1}"
+fi
 
-cp -a app/models/dbclasses.py app/models/dbclasses.py.`date +%Y%m%d-%H%M`.bak
-sed -i "s/maildb\_vexim2/${SQL_SCHEMA}/" app/models/dbclasses.py
-sed -i "s/^db\s=\sSQLAlchemy/#db = SQLAlchemy/" app/models/dbclasses.py
+echo "${SQL_SCHEMA} will be used as target DB"
+
+sed "s/###targetdb###/${SQL_SCHEMA}/" ${MODELS_ORIG} > ${MODELS}
 
 . activate
 if [[ ! -d "migrations" ]]; then
