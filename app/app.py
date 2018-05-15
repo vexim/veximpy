@@ -1,6 +1,6 @@
 # app/app.py
 
-from os import listdir,  path
+from os import listdir, path
 # third-party imports
 from flask import abort, Flask, render_template, redirect, request, url_for
 from flask_bootstrap import Bootstrap

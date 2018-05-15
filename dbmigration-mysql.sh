@@ -13,51 +13,53 @@
 # mysqldump --user=<username> -p --host=<dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "vexim2db"
 #
 
-if [ ! -f "${1}" ]; then
-    echo "file ${1} does not exist"
+DUMPFILE="${1}"
+DB_ORIGIN="${2}"
+DB_TARGET="${3}"
+
+if [ ! -f "${DUMPFILE}" ]; then
+    echo "file ${DUMPFILE} does not exist"
     exit
 fi
 
-CNT_ORIGIN=$(grep -o "${2}" ${1} | wc -l)
-CNT_TARGET=$(grep -o "${3}" ${1} | wc -l)
+CNT_ORIGIN=$(grep -o "${DB_ORIGIN}" ${DUMPFILE} | wc -l)
+CNT_TARGET=$(grep -o "${DB_TARGET}" ${DUMPFILE} | wc -l)
 
 if [[ ${CNT_ORIGIN} -eq 0 ]] && [[ ${CNT_TARGET} -eq 0 ]]; then
-    echo "wether original DB ${2} nor target DB ${3} found in file ${1}"
+    echo "wether original DB ${DB_ORIGIN} nor target DB ${DB_TARGET} found in file ${DUMPFILE}"
     exit
 fi
 
 if [[ ${CNT_ORIGIN} -gt 0 ]]; then
-    sed -i "s/${2}/${3}/" ${1}
+    sed -i "s/${DB_ORIGIN}/${DB_TARGET}/" ${DUMPFILE}
 fi
 
-echo "create and import to target database ${3}"
-echo "the user must exist and have create access to the target DB ${3}"
+echo "create and import to target database ${DB_TARGET}"
+echo "the user must exist and have create access to the target DB ${DB_TARGET}"
 echo "mysql host: [127.0.0.1]"
-read HOST
+read DB_HOST
 echo "mysql port [3306]: "
-read PORT
+read DB_PORT
 echo "mysql user: "
-read USER
+read DB_USER
 echo "mysql passwd: "
 stty -echo
-read PW
+read DB_PW
 stty echo
 
-if [[ -z ${HOST} ]]; then
-    HOST="127.0.0.1"
+if [[ -z ${DB_HOST} ]]; then
+    DB_HOST="127.0.0.1"
 fi
 
-if [[ -z ${PORT} ]]; then
-    PORT="3306"
+if [[ -z ${DB_PORT} ]]; then
+    DB_PORT="3306"
 fi
-echo "mysql -u ${USER} -pXXXXXXXXXX -h ${HOST} -P ${PORT}"
+echo "mysql -u ${DB_USER} -pXXXXXXXXXX -h ${DB_HOST} -P ${DB_PORT}"
 
 # create and populate mysqldb
-mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "CREATE DATABASE IF NOT EXISTS ${3}"
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "CREATE DATABASE IF NOT EXISTS ${DB_TARGET}"
 if [[ $? -eq 0 ]]; then
-    mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} ${3} < ${1}
-    mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "UPDATE veximtest.users SET role = 64 WHERE admin=1"
-    mysql -v -u ${USER} -p${PW} -h ${HOST} -P ${PORT} -e "UPDATE veximtest.users SET role = 192 WHERE user_id=1"
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} ${DB_TARGET} < ${DUMPFILE}
 fi
 if [[ $? -ne 0 ]]; then
     echo "Abort after MySQL error"
@@ -66,7 +68,10 @@ fi
 
 # call the script which handles `flask db {init|migrate|upgrade}´
 if [[ -f "$(dirname ${0})/dbreinit.sh" ]]; then
-    bash $(dirname ${0})/dbreinit.sh ${3}
+    . $(dirname ${0})/dbreinit.sh ${DB_TARGET}
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 64 WHERE admin=1"
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 192 WHERE user_id=1"
 else
     echo "$(dirname ${0})/dbreinit.sh does not exist"
 fi
+
