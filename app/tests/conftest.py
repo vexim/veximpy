@@ -1,17 +1,17 @@
-import datetime
-import json
+#import datetime
+#import json
 
 import pytest
-import pytz
-from mock import Mock
+#import pytz
+#from mock import Mock
 
 from instance import config
-from app.config.settings import settings
+#from app.config.settings import settings
 from app.app import create_app
 from app.app import db as _db
 
 
-import pdb
+#import pdb
 
 from app.models.models import Domain, User
 
@@ -22,15 +22,12 @@ def app():
 
     :return: Flask app
     """
-    db_uri = '{0}'.format(config.SQLALCHEMY_DATABASE_URI)
+    
     params = {
-        'DEBUG': False,
-        'TESTING': True,
-        'WTF_CSRF_ENABLED': False,
-        'SQLALCHEMY_DATABASE_URI': db_uri
+        'SQLALCHEMY_DATABASE_URI': '{0}'.format(config.SQLALCHEMY_DATABASE_URI_TESTS), 
     }
 
-    _app = create_app('development', settings_override=params)
+    _app = create_app('tests', settings_override=params)
 
     # Establish an application context before running the tests.
     ctx = _app.app_context()

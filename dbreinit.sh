@@ -1,16 +1,4 @@
 #!/bin/bash
-MODELS="$(dirname ${0})/app/models/models.py"
-MODELS_ORIG="$(dirname ${0})/app/models/models_orig.py"
-
-if [[ -z "${1}" ]]; then
-    SQL_SCHEMA="veximtest"
-else
-    SQL_SCHEMA="${1}"
-fi
-
-echo "${SQL_SCHEMA} will be used as target DB"
-
-sed "s/###targetdb###/${SQL_SCHEMA}/" ${MODELS_ORIG} > ${MODELS}
 
 . activate
 if [[ ! -d "migrations" ]]; then

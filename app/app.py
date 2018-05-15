@@ -7,7 +7,6 @@ from flask_bootstrap import Bootstrap
 from flask_login import current_user, LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from functools import wraps
 #from urllib import urlencode, quote, unquote
 from flask_debugtoolbar import DebugToolbarExtension
 

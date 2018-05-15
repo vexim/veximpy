@@ -7,33 +7,39 @@ If you get some `Duplicate index` warnings - ignore them.
 
 ## Install Python3 environment
 
+Create and cd to a directory where you want to install veximpy
+
+Eg: `mkdir -p ~/projects/veximpy; cd ~/projects/veximpy`
+
+Get the code `git clone git@gitlab.com:runout/veximpy.git`
+
 Call `bash pysetup.sh`
 
 This creates a virtual environment under `venv` and modified templates for nginx and uwsgi under `doc`
 
 If a domain/server name is provided as first parameter it will be used for the nginx template. 
 
-You have to edit the **DB credencials** in `instance/config.py`.
+You have to **edit the DB credencials** in `instance/config.py`.
 
 ## Install a new vexim DB
 
-Create a DB and a DB user.
+Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.
 
-Then simply call:
-
-`bash dbinstall.sh <targetDBname>`
+Then simply call: `bash dbinstall.sh <targetDBname>`
 
 This will create tables in the DB <targetDBname> and create the siteadmin user.
 
-If \<targetDBname\> is ommited, 'veximtest' will be used.
-
-This script will copy `app/models/models_orig.py` with the \<targetDBname\> as DB to `app/models/models.py`
+If \<targetDBname\> is ommited, 'veximtest' will be used as target DB.
 
 ## Upgrade an existing vexim2 DB
 
-Migration will be done to a new DB. (in-place-migration is not supported)
+Migration should be done to a new DB. (in-place-migration is not reccomended due to potentional data loss)
+
+Make sure there is no `migrations/` directory.
 
 Create a dump from your original vexim DB.
+
+Eg: `mysqldump -u <username> -p -h <dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "<vexim2db>"`
 
 Create a DB user for the new DB.
 
@@ -44,7 +50,7 @@ Then call (with 3 parameters):
 You will be prompted for a target DB host, port, user and password.
 It will call the `bash dbreinit.sh <targetDBname>` script in the end.
 
-More information can be found inside this script file.
+More information can be found inside the `dbreinit.sh` script file.
 Even an example for creating a dump from your original vexim DB.
 
 ## NGINX, UWSGI
@@ -69,17 +75,19 @@ Eg: `app/static/ressources/example.com/logo.svg`
 
 # Automated tests
 
-See the `app/tests` directory.
+If you want to run tests, create an additional DB `veximtest_test`, as tests destroy all data, create there own data and truncate all tables in the end! The test DB is configured in `instance/config.py`
+
+`pytest -v` will run all configureed tests.
+
+See the `app/tests` directory and `app/lib/tests.py`.
 
 # Internal Notes:
 
-Create or upgrade a new database.
+Create or upgrade a new database: `bash ./dbreinit.sh`.
 This script does some magic on setting the name for the database (set the variable inside the file) and adds missing imports to the versions file of alembic/flask-migrate.
 It calls `flask db init`, `flask db migrate` and `flask db upgrade`.
 
-bash ./dbreinit.sh
-
-Reverse engeneering of an existing database
+## Reverse engeneering of an existing database
 
 ```
 echo "mysql user: "; read USER; echo "mysql passwd: "; stty -echo; read PW; stty echo; flask-sqlacodegen --flask --schema maildb_vexim2 mysql://${USER}:${PW}@127.0.0.1/maildb_vexim2 | sed "s/maildb\_vexim2\.//"

@@ -1,26 +1,27 @@
 # coding: utf-8
 
 #import string 
-from sqlalchemy import Column, Enum, ForeignKey, Index, Integer, SmallInteger, String, Table, Text
-from sqlalchemy.schema import FetchedValue
-from sqlalchemy.orm import relationship
-from flask import abort
-from flask_sqlalchemy import SQLAlchemy
+#from sqlalchemy import Column, Enum, ForeignKey, Index, Integer, SmallInteger, String, Table, Text
+#from sqlalchemy.schema import FetchedValue
+#from sqlalchemy.orm import relationship
+#from flask import abort
+#from flask_sqlalchemy import SQLAlchemy
 from app.app import db, login_manager
+#from instance.config import VEXIMDB_SCHEMA
 from ..config.settings import settings
-from flask_login import current_user, UserMixin
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.context import CryptContext
-from functools import wraps
+#from functools import wraps
 
 
 class Blocklist(db.Model):
     __tablename__ = 'blocklists'
-    __table_args__ = {'schema': 'veximtest', 'mysql_row_format': 'DYNAMIC'}
+    __table_args__ = {'mysql_row_format': 'DYNAMIC'}
 
     block_id = db.Column(db.Integer, primary_key=True)
-    domain_id = db.Column(db.ForeignKey('veximtest.domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    user_id = db.Column(db.ForeignKey('veximtest.users.user_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    user_id = db.Column(db.ForeignKey('users.user_id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     blockhdr = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=db.FetchedValue())
     blockval = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=db.FetchedValue())
     color = db.Column(db.String(8, 'utf8mb4_unicode_ci'), nullable=False, server_default=db.FetchedValue())
@@ -31,10 +32,10 @@ class Blocklist(db.Model):
 
 class Domainalia(db.Model):
     __tablename__ = 'domainalias'
-    __table_args__ = {'schema': 'veximtest', 'mysql_row_format': 'DYNAMIC'}
+    __table_args__ = {'mysql_row_format': 'DYNAMIC'}
 
     domainalias_id = db.Column(db.Integer, primary_key=True)
-    domain_id = db.Column(db.ForeignKey('veximtest.domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     alias = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, unique=True, index=True)
     enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_ENABLED']))
     host_smtp = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_SMTP'])
@@ -53,7 +54,7 @@ class Domainalia(db.Model):
 
 class Domain(db.Model):
     __tablename__ = 'domains'
-    __table_args__ = {'schema': 'veximtest', 'mysql_row_format': 'DYNAMIC'}
+    __table_args__ = {'mysql_row_format': 'DYNAMIC'}
 
     domain_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, unique=True, server_default='', index=True)
@@ -107,9 +108,9 @@ class Domain(db.Model):
 
 t_group_contents = db.Table(
     'group_contents',
-    db.Column('group_id', db.ForeignKey('veximtest.groups.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
-    db.Column('member_id', db.ForeignKey('veximtest.users.user_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
-    schema='veximtest'
+    db.Column('group_id', db.ForeignKey('groups.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    db.Column('member_id', db.ForeignKey('users.user_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    #schema=VEXIMDB_SCHEMA
 )
 
 
@@ -117,28 +118,28 @@ class Group(db.Model):
     __tablename__ = 'groups'
     __table_args__ = (
         db.Index('group_name', 'domain_id', 'name'),
-        {'schema': 'veximtest', 'mysql_row_format': 'DYNAMIC'}
+        {'mysql_row_format': 'DYNAMIC'}
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    domain_id = db.Column(db.ForeignKey('veximtest.domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(64, 'utf8mb4_unicode_ci'), nullable=False)
     is_public = db.Column(db.Integer, nullable=False, server_default=str(settings['GROUPDEFAULT_IS_PUBLIC']))
     enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['GROUPDEFAULT_ENABLED']))
 
     domain = db.relationship('Domain', primaryjoin='Group.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='groups')
-    members = db.relationship('User', secondary='veximtest.group_contents', backref='groups')
+    members = db.relationship('User', secondary='group_contents', backref='groups')
 
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     __table_args__ = (
         db.Index('username', 'localpart', 'domain_id'),
-        {'schema': 'veximtest', 'mysql_row_format': 'DYNAMIC'}
+        {'mysql_row_format': 'DYNAMIC'}
     )
 
     user_id = db.Column(db.Integer, primary_key=True)
-    domain_id = db.Column(db.ForeignKey('veximtest.domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     localpart = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, index=True, server_default='')
     username = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default='')
     clear = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
