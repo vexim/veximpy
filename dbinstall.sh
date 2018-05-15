@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -d "migrations" ]]; then
+    echo "Directory 'migrations' exists. If you really want to install a new DB remove it: \`rm -r migrations\`"
+    exit
+fi
+
 if [[ -z "${1}" ]]; then
     SQL_SCHEMA="veximtest"
 else
