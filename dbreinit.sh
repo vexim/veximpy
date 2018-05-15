@@ -1,5 +1,4 @@
 #!/bin/bash
-echo "${DB_USER} ${DB_HOST} ${DB_PORT}"
 MODELS="$(dirname ${0})/app/models/models.py"
 MODELS_ORIG="$(dirname ${0})/app/models/models_orig.py"
 

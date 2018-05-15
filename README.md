@@ -20,7 +20,7 @@ Create a DB and a DB user.
 
 Then simply call:
 
-`bash dbreinit.sh <targetDBname>`
+`bash dbinstall.sh <targetDBname>`
 
 This will create tables in the DB <targetDBname>.
 
