@@ -13,26 +13,24 @@ This creates a virtual environment under `venv` and modified templates for nginx
 
 If a domain/server name is provided as first parameter it will be used for the nginx template. 
 
-You have to edit the file `instance/config.py`.
+You have to edit the **DB credencials** in `instance/config.py`.
 
 ## Install a new vexim DB
+
 Create a DB and a DB user.
 
 Then simply call:
 
 `bash dbinstall.sh <targetDBname>`
 
-This will create tables in the DB <targetDBname>.
+This will create tables in the DB <targetDBname> and create the siteadmin user.
 
 If \<targetDBname\> is ommited, 'veximtest' will be used.
 
 This script will copy `app/models/models_orig.py` with the \<targetDBname\> as DB to `app/models/models.py`
 
-Create the siteadmin Domain with `mysql -u <user> -p -h <host> -p <port> -e "INSERT INTO `domains` (`domain_id`, `domain`) VALUES ('1', 'site')"`
-
-Create the siteadmin User with `mysql -u <user> -p -h <host> -p <port> -e "INSERT INTO `users` (`domain_id`, `localpart`, `username`, `crypt`) VALUES ('1', 'siteadmin', 'siteadmin', '<PASSWORDHASH>')"`
-
 ## Upgrade an existing vexim2 DB
+
 Migration will be done to a new DB. (in-place-migration is not supported)
 
 Create a dump from your original vexim DB.
@@ -55,7 +53,13 @@ Sample files can be found under the `doc` directory.
 
 Make sure you have certificates for the domain(s)
 
-Review, edit and copy these files to `/etc/nginx/sites-available` and `/etc/uwsgi/apps-available`. Set appropriate symlinks in the *-enabled directories and restart nginx/uwsgi.
+Review, edit and copy these files to `/etc/nginx/sites-available` and `/etc/uwsgi/apps-available`. Set appropriate symlinks in the \*-enabled directories and restart nginx/uwsgi.
+
+## Configuration
+
+See `instance/config.py` for DB variables.
+
+See `app/config/settings.py` for defaults and other variables.
 
 # Logo per Domain
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -d "migrations" ]]; then
+if [[ -d "$(dirname ${0})migrations" ]]; then
     echo "Directory 'migrations' exists. If you really want to install a new DB remove it: \`rm -r migrations\`"
     exit
 fi
@@ -18,6 +18,7 @@ stty echo
 
 # call the script which handles `flask db {init|migrate|upgrade}´
 if [[ -f "$(dirname ${0})/dbreinit.sh" ]]; then
+    . $(dirname ${0})/activate
     . $(dirname ${0})/dbreinit.sh ${DB_TARGET}
     python3 app/models/siteadminadd.py ${SITEADMIN_PW}
 else

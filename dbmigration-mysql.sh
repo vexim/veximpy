@@ -22,6 +22,11 @@ if [ ! -f "${DUMPFILE}" ]; then
     exit
 fi
 
+if [[ -d "$(dirname ${0})/migrations" ]]; then
+    echo "Directory 'migrations' exists. If you really want to install a new DB remove it: \`rm -r migrations\`"
+    exit
+fi
+
 CNT_ORIGIN=$(grep -o "${DB_ORIGIN}" ${DUMPFILE} | wc -l)
 CNT_TARGET=$(grep -o "${DB_TARGET}" ${DUMPFILE} | wc -l)
 
@@ -68,6 +73,7 @@ fi
 
 # call the script which handles `flask db {init|migrate|upgrade}´
 if [[ -f "$(dirname ${0})/dbreinit.sh" ]]; then
+    . $(dirname ${0})/activate
     . $(dirname ${0})/dbreinit.sh ${DB_TARGET}
     mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 64 WHERE admin=1"
     mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 192 WHERE user_id=1"
