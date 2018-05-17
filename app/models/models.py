@@ -12,6 +12,7 @@ from ..config.settings import settings
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.context import CryptContext
+from passlib.hash import pbkdf2_sha256, pbkdf2_sha512
 #from functools import wraps
 
 
@@ -173,8 +174,8 @@ class User(db.Model, UserMixin):
 
     domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')
 
-    ROLE_SITEADMIN      = 0b10000000 # int 128
-    ROLE_POSTMASTER     = 0b00001000 # int 8
+    ROLE_SITEADMIN      = 0b1000000010000000 # int 32896
+    ROLE_POSTMASTER     = 0b10000000 # int 128
     
     @property
     def id(self):
@@ -228,15 +229,13 @@ class User(db.Model, UserMixin):
         """
         Set password to a hashed password
         """
-        self.crypt = generate_password_hash(password)
+        self.crypt = pbkdf2_sha512.hash(password)
 
     def verify_password(self, password):
         """
         Check if hashed password matches actual password
         """
-        # return check_password_hash(self.crypt, password)
-        crypt_context = CryptContext(schemes=['md5_crypt', 'pbkdf2_sha256'])
-        #return crypt_context.hash(password)
+        crypt_context = CryptContext(schemes=['md5_crypt', 'pbkdf2_sha256', 'pbkdf2_sha512'])
         return crypt_context.verify(password, self.crypt)
 
     @property

@@ -24,13 +24,16 @@ def domainlist(domaintype):
 
     require_siteadmin()
 
+    if domaintype not in domainlist_title:
+        domaintype = 'local'
+
     if domaintype == 'alias':
         domainlist = Domainalia.query.order_by(Domainalia.alias).all()
     else:
         domainlist = Domain.query.filter(Domain.type == domaintype).order_by(Domain.domain)
 
     return render_template('domains/domainlist.html',
-        title="Domains",  list_title=domainlist_title[domaintype] + " Domains",
+        title="Domains", list_title=domainlist_title[domaintype] + " Domains",
         domainlist=domainlist,
         domaintype=domaintype)
 
@@ -74,6 +77,9 @@ def domains_add(domaintype):
 
     add_domain = True
 
+    if domaintype not in domainlist_title:
+        domaintype = 'local'
+
     if domaintype == 'local':
         form = DomainFormLocal(action='add')
     elif domaintype == 'alias':
@@ -116,7 +122,7 @@ def domains_add(domaintype):
                 return render_template('domains/domain.html', action='Add',
                                     domainname = '', 
                                     add_domain=add_domain, form=form,
-                                    title='Add ' + domaintype + ' domain')
+                                    title='Add ' + domainlist_title[domaintype] + ' Domain')
             
             if domaintype == 'local':
                 account = User()
@@ -133,13 +139,13 @@ def domains_add(domaintype):
                         return render_template('domains/domain.html', action='Add',
                                             domainname = '', 
                                             add_domain=add_domain, form=form,
-                                            title='Add ' + domaintype + ' domain')
+                                            title='Add ' + domainlist_title[domaintype] + ' Domain')
                 else:
                     flash(Markup('An error occured on adding a postmaster account to domain <b>' + domainname + '</b> during form data validation.'), 'error')
                     return render_template('domains/domain.html', action='Add',
                                             domainname = '', 
                                             add_domain=add_domain, form=form,
-                                            title='Add ' + domaintype + 'domain')
+                                            title='Add ' + domainlist_title[domaintype] + ' Domain')
             flash(Markup('You have successfully added the domain <b>' + domainname + '</b>'), 'success')
 
             # redirect to domainlist page
@@ -151,7 +157,7 @@ def domains_add(domaintype):
     return render_template('domains/domain.html', action='Add',
                             domainname = '', 
                             add_domain=add_domain, form=form,
-                            title='Add ' + domaintype + ' domain')
+                            title='Add ' + domainlist_title[domaintype] + ' Domain')
 
 @domains.route('/domains_edit/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 @domains.route('/domains_edit/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])

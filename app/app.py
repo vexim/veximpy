@@ -52,8 +52,8 @@ def create_app(config_name,  settings_override=None):
     login_manager.login_view = "auth.login"
     migrate = Migrate(app, db)
 
-    debug_toolbar = DebugToolbarExtension()
-    debug_toolbar.init_app(app)
+    #debug_toolbar = DebugToolbarExtension()
+    #debug_toolbar.init_app(app)
 
     session_domain_id = 0
 
@@ -76,6 +76,8 @@ def create_app(config_name,  settings_override=None):
 
     from .accounts import accounts as accounts_blueprint
     app.register_blueprint(accounts_blueprint)
+    #import pdb
+    #pdb.set_trace()
 
     @app.template_filter()
     def ressource_dir(d):

@@ -61,7 +61,7 @@ settings = {
     'POSTMASTERDEFAULT_UNSEEN': 0,
     'POSTMASTERDEFAULT_ON_VACATION': 0,
     'POSTMASTERDEFAULT_VACATION': '', 
-    'POSTMASTERDEFAULT_ROLE': 0b00001000,
+    'POSTMASTERDEFAULT_ROLE': 0b10000000,
     
     # defaults for groups
     # https://github.com/vexim/vexim2/wiki/Group-Feature

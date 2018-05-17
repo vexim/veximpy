@@ -24,6 +24,7 @@ def app():
     """
     
     params = {
+        'WTF_CSRF_ENABLED': False,
         'SQLALCHEMY_DATABASE_URI': '{0}'.format(config.SQLALCHEMY_DATABASE_URI_TESTS), 
     }
 
@@ -64,24 +65,60 @@ def db(app):
     # It will result in faster tests.
     
     domain_dict = {
-        'domain': 'runout.at',
-        'domain_id': 1, 
+        'domain_id': 1,
+        'domain': 'site',
         }
     
     domain = Domain(**domain_dict)
     _db.session.add(domain)
-    _db.session.commit()
+#    _db.session.commit()
 
     account_dict = {
         'domain_id': 1,
-        'role': 0b00001000,
-        'localpart': 'postmaster', 
-        'username': 'admin@local.host',
+        'role': 0b1000000010000000, 
+        'localpart': 'siteadmin', 
+        'username': 'siteadmin',
+        'admin': 1, 
     }
 
     siteadmin = User(**account_dict)
-    siteadmin.password_set('password')
+    siteadmin.password_set('TEST-password_1657')
     _db.session.add(siteadmin)
+#    _db.session.commit()
+
+    domain_dict = {
+        'domain_id': 2,
+        'domain': 'runout.at',
+        }
+    
+    domain = Domain(**domain_dict)
+    _db.session.add(domain)
+#    _db.session.commit()
+
+    account_dict = {
+        'domain_id': 2,
+        'role': 0b10000000,
+        'localpart': 'postmaster', 
+        'username': 'postmaster@runout.at',
+        'admin': 1, 
+    }
+
+    postmaster = User(**account_dict)
+    postmaster.password_set('TEST-password_1657')
+    _db.session.add(postmaster)
+
+    account_dict = {
+        'domain_id': 2,
+        'role': 0b00000000,
+        'localpart': 'user', 
+        'username': 'user@local.host',
+        'admin': 0, 
+    }
+
+    user = User(**account_dict)
+    user.password_set('TEST-password_1657')
+    _db.session.add(user)
+
     _db.session.commit()
 
     return _db

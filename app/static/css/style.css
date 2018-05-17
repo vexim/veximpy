@@ -195,6 +195,23 @@ th.rotate-75 > div > span {
 .form-control {
     margin-bottom: 0.2em;
 }
+
+label:before {
+    font-family: 'Font Awesome 5 Free';
+    /*font-weight: 900;*/
+    padding-right:8px;
+}
+
+label[for="username"]:before {
+    content: "\f007";
+}
+
+label[for="password"]:before,
+label[for="password1"]:before,
+label[for="password2"]:before {
+    content: "\f084";
+}
+
 .help-block {
     color: grey;
     font-size: small;

@@ -57,7 +57,7 @@ def login(client, username='', password=''):
     :type password: str
     :return: Flask response
     """
-    user = dict(identity=username, password=password)
+    user = dict(username=username, password=password)
 
     response = client.post(url_for('auth.login'), data=user,
                            follow_redirects=True)

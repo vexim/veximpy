@@ -7,7 +7,7 @@ import pdb
 
 class TestPreLogin(ViewTestMixin):
     def test_rootpage(self, db):
-        response = self.client.get(url_for('home.homepage'))
+        response = self.client.get(url_for('home.homepage'), follow_redirects=True)
         #pdb.set_trace()
         #assert response.status_code == 200
         assert_status_with_message(200, response, '/login')

@@ -33,7 +33,7 @@ def create_siteadmin(self, siteadmin_password):
             user.username = "siteadmin"
             user.password_set(siteadmin_password)
             user.admin = 1
-            user.role = 192
+            user.role = 0b1000000010000000
             db.session.add(user)
             db.session.commit()
 

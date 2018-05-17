@@ -6,6 +6,7 @@ from wtforms import BooleanField, IntegerField, PasswordField, SelectField, Stri
 from wtforms_components import read_only
 from ..lib.forms_functions import TextAreaSepListField, IPList, PasswordRules, URI, DomainExists, bool_checked
 from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
+from markupsafe import Markup
 from ..config.settings import settings
 
 class DomainFormLocal(FlaskForm):
@@ -82,6 +83,7 @@ class DomainFormLocal(FlaskForm):
     pwd_charallowed = StringField('Allowed password characters', default=settings['PWDCHARSALLOWED'], validators=[Length(min=64, max=255)])
     pwd_lengthmin = IntegerField('Minimum length for passwords', default=settings['PWDLENGTHMIN'], validators=[NumberRange(min=settings['PWDLENGTHMIN'], max=2147483647)])
     #pwd_rules
+
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
     submitcancel = SubmitField('Cancel')
