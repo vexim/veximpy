@@ -75,8 +75,9 @@ fi
 if [[ -f "$(dirname ${0})/dbreinit.sh" ]]; then
     . $(dirname ${0})/activate
     . $(dirname ${0})/dbreinit.sh ${DB_TARGET}
-    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 128 WHERE admin=1"
-    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE veximtest.users SET role = 32896 WHERE user_id=1"
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 128 WHERE admin=1 OR localpart='postmaster'"
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 32896 WHERE user_id=1 OR username='siteadmin'"
+    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "ALTER TABLE ${DB_TARGET}.domainalias CHANGE COLUMN domainalias_id domainalias_id INT(11) NOT NULL AUTO_INCREMENT , DROP PRIMARY KEY, ADD PRIMARY KEY (domainalias_id)"
 else
     echo "$(dirname ${0})/dbreinit.sh does not exist"
 fi

@@ -5,8 +5,8 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, PasswordField, SelectField, StringField, SubmitField, TextAreaField
 from ..lib.forms_functions import TextAreaSepListField, IPList, PasswordRules, URI, Localpart,  Username, bool_checked
 from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
-from ..models.models import Domain, User
-from ..config.settings import settings
+from ..models.models import Domain #, User
+from ..config.settings import domaindefaults, postmasterdefaults, settings
 
 
 class AccountFormLocal(FlaskForm):
@@ -39,12 +39,11 @@ class AccountFormLocal(FlaskForm):
         elif self.action == 'addpostmaster':
             self.set_defaults_from_domain()
             self.set_defaults_for_postmaster()
-            self.role = settings['POSTMASTERDEFAULT_ROLE']
+            self.role = postmasterdefaults['role']
         elif self.action == 'edit':
             del self.submitadd
             #form.password1.flags.required = False
 
-        print(obj.__dict__)
         if settings['POSTMASTER_CHANGEUIDGID'] != 1:
             del self.uid
             del self.gid
@@ -86,7 +85,7 @@ class AccountFormLocal(FlaskForm):
         else:
             _quotamin = 10
             _quotamax = self.domain.quotas
-        self.enabled.data=bool_checked(settings['DOMAINDEFAULT_ENABLED'])
+        self.enabled.data=bool_checked(domaindefaults['enabled'])
         self.realname.data=''
         self.localpart.data=''
         self.username.data=''
@@ -121,19 +120,19 @@ class AccountFormLocal(FlaskForm):
         self.admin.data =1
         self.on_pipe.data = 0
         self.smtp.data = path.join(self.domain.maildir, 'postmaster', 'Maildir')
-        self.quota.data = settings['POSTMASTERDEFAULT_QUOTA']
-        self.maxmsgsize.data = settings['POSTMASTERDEFAULT_MAXMSGSIZE']
-        self.on_blocklist.data = settings['POSTMASTERDEFAULT_ON_BLOCKLIST']
-        self.on_avscan.data = settings['POSTMASTERDEFAULT_ON_AVSCAN']
-        self.on_spamassassin.data = settings['POSTMASTERDEFAULT_ON_SPAMASSASSIN']
-        self.sa_tag.data = settings['POSTMASTERDEFAULT_SA_TAG']
-        self.sa_refuse.data = settings['POSTMASTERDEFAULT_SA_REFUSE']
-        self.spam_drop.data = settings['POSTMASTERDEFAULT_SPAM_DROP']
-        self.on_forward.data = settings['POSTMASTERDEFAULT_ON_FORWARD']
-        self.forward.data = settings['POSTMASTERDEFAULT_FORWARD']
-        self.unseen.data = settings['POSTMASTERDEFAULT_UNSEEN']
-        self.on_vacation.data = settings['POSTMASTERDEFAULT_ON_VACATION']
-        self.vacation.data = settings['POSTMASTERDEFAULT_VACATION']
+        self.quota.data = postmasterdefaults['quota']
+        self.maxmsgsize.data = postmasterdefaults['maxmsgsize']
+        self.on_blocklist.data = postmasterdefaults['on_blocklist']
+        self.on_avscan.data = postmasterdefaults['on_avscan']
+        self.on_spamassassin.data = postmasterdefaults['on_spamassassin']
+        self.sa_tag.data = postmasterdefaults['sa_tag']
+        self.sa_refuse.data = postmasterdefaults['sa_refuse']
+        self.spam_drop.data = postmasterdefaults['spam_drop']
+        self.on_forward.data = postmasterdefaults['on_forward']
+        self.forward.data = postmasterdefaults['forward']
+        self.unseen.data = postmasterdefaults['unseen']
+        self.on_vacation.data = postmasterdefaults['on_vacation']
+        self.vacation.data = postmasterdefaults['vacation']
         self.admin.data = 1
 
 
@@ -194,7 +193,7 @@ class AccountFormLocal(FlaskForm):
 
 
 class AccountFormAlias(FlaskForm):
-    enabled = BooleanField('Enabled', default=bool_checked(settings['DOMAINDEFAULT_ENABLED']), false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     realname = StringField('Realname', validators=[Length(min=1, max=255)])
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     username = StringField('Username', validators=[Length(min=1, max=255)])
@@ -217,7 +216,7 @@ class AccountFormAlias(FlaskForm):
 
 
 class AccountFormFail(FlaskForm):
-    enabled = BooleanField('Enabled', default=bool_checked(settings['DOMAINDEFAULT_ENABLED']), false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
     submitadd = SubmitField('Add domain')

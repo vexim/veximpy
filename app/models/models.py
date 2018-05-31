@@ -8,9 +8,8 @@
 #from flask_sqlalchemy import SQLAlchemy
 from app.app import db, login_manager
 #from instance.config import VEXIMDB_SCHEMA
-from ..config.settings import settings
+from ..config.settings import groupdefaults, domaindefaults,  accountdefaults, settings
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha256, pbkdf2_sha512
 #from functools import wraps
@@ -38,10 +37,10 @@ class Domainalia(db.Model):
     domainalias_id = db.Column(db.Integer, primary_key=True)
     domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     alias = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, unique=True, index=True)
-    enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_ENABLED']))
-    host_smtp = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_SMTP'])
-    host_imap = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_IMAP'])
-    host_pop = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_POP'])
+    enabled = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['enabled']))
+    host_smtp = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_smtp'])
+    host_imap = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_imap'])
+    host_pop = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_pop'])
 
     domain = db.relationship('Domain', primaryjoin='Domainalia.domain_id == Domain.domain_id', backref='domainalias')
 
@@ -59,30 +58,30 @@ class Domain(db.Model):
 
     domain_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, unique=True, server_default='', index=True)
-    maildir = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), nullable=False, server_default=settings['DOMAINDEFAULT_MAILDIR'])
-    uid = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_UID']))
-    gid = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_GID']))
-    max_accounts = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_MAXACCOUNTS']))
-    quotas = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_QUOTAS']))
-    quotasmax = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_QUOTASMAX']))
+    maildir = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), nullable=False, server_default=domaindefaults['maildir'])
+    uid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['uid']))
+    gid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['gid']))
+    max_accounts = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['max_accounts']))
+    quotas = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['quotas']))
+    quotasmax = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['quotasmax']))
     type = db.Column(db.String(5, 'utf8mb4_unicode_ci'))
-    avscan = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_AVSCAN']))
-    blocklists = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_BLOCKLISTS']))
-    enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_ENABLED']))
-    mailinglists = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_MAILINGLISTS']))
-    maxmsgsize = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_MAXMSGSIZE']))
-    pipe = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_PIPE']))
-    spamassassin = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_SPAMASSASSIN']))
-    sa_tag = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_SA_TAG']))
-    sa_refuse = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_SA_REFUSE']))
-    out_ip = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=settings['DOMAINDEFAULT_OUT_IP'])
-    host_smtp = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_SMTP'])
-    host_imap = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_IMAP'])
-    host_pop = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_HOST_POP'])
-    relayto = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=settings['DOMAINDEFAULT_RELAYTO'])
-    pwd_charallowed = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=settings['PWDCHARSALLOWED'])
-    pwd_lengthmin = db.Column(db.Integer, nullable=False, server_default=str(settings['PWDLENGTHMIN']))
-    pwd_rules = db.Column(db.Integer, nullable=False, server_default='255')
+    avscan = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['avscan']))
+    blocklists = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['blocklists']))
+    enabled = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['enabled']))
+    mailinglists = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['mailinglists']))
+    maxmsgsize = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['maxmsgsize']))
+    pipe = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pipe']))
+    spamassassin = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['spamassassin']))
+    sa_tag = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['sa_tag']))
+    sa_refuse = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['sa_refuse']))
+    out_ip = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=domaindefaults['out_ip'])
+    host_smtp = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_smtp'])
+    host_imap = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_imap'])
+    host_pop = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_pop'])
+    relayto = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['relayto'])
+    pwd_charallowed = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default=domaindefaults['pwd_charallowed'])
+    pwd_lengthmin = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_lengthmin']))
+    pwd_rules = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_rules']))
 
     PWDRULES_LOWER      = 0b00000001
     PWDRULES_UPPER      = 0b00000010
@@ -125,8 +124,8 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     name = db.Column(db.String(64, 'utf8mb4_unicode_ci'), nullable=False)
-    is_public = db.Column(db.Integer, nullable=False, server_default=str(settings['GROUPDEFAULT_IS_PUBLIC']))
-    enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['GROUPDEFAULT_ENABLED']))
+    is_public = db.Column(db.Integer, nullable=False, server_default=str(groupdefaults['is_public']))
+    enabled = db.Column(db.Integer, nullable=False, server_default=str(groupdefaults['enabled']))
 
     domain = db.relationship('Domain', primaryjoin='Group.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='groups')
     members = db.relationship('User', secondary='group_contents', backref='groups')
@@ -145,28 +144,28 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default='')
     clear = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     crypt = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
-    uid = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_UID']))
-    gid = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_GID']))
+    uid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['uid']))
+    gid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['gid']))
     smtp = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), server_default='')
     pop = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), server_default='')
     type = db.Column(db.Enum('local', 'alias', 'catch', 'fail', 'piped', 'admin', 'site'), nullable=False, server_default='local')
     admin = db.Column(db.Integer, nullable=False, server_default='0')
-    on_avscan = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_AVSCAN']))
-    on_blocklist = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_BLOCKLISTS']))
+    on_avscan = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['avscan']))
+    on_blocklist = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['blocklists']))
     on_forward = db.Column(db.Integer, nullable=False, server_default='0')
     on_piped = db.Column(db.Integer, nullable=False, server_default='0')
     on_spamassassin = db.Column(db.Integer, nullable=False, server_default='1')
     on_vacation = db.Column(db.Integer, nullable=False, server_default='0')
     spam_drop = db.Column(db.Integer, nullable=False, server_default='0')
-    enabled = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_ENABLED']))
+    enabled = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['enabled']))
     flags = db.Column(db.String(16, 'utf8mb4_unicode_ci'))
     forward = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), server_default='')
     unseen = db.Column(db.Integer, nullable=False, server_default='0')
-    maxmsgsize = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_MAXMSGSIZE']))
-    quota = db.Column(db.Integer, nullable=False, server_default=str(settings['DOMAINDEFAULT_QUOTAS']))
+    maxmsgsize = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['maxmsgsize']))
+    quota = db.Column(db.Integer, nullable=False, server_default=str(accountdefaults['quota']))
     realname = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
-    sa_tag = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_SA_TAG']))
-    sa_refuse = db.Column(db.SmallInteger, nullable=False, server_default=str(settings['DOMAINDEFAULT_SA_REFUSE']))
+    sa_tag = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['sa_tag']))
+    sa_refuse = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['sa_refuse']))
     tagline = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     vacation = db.Column(db.Text(collation='utf8mb4_unicode_ci'))
     comment = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
@@ -229,7 +228,10 @@ class User(db.Model, UserMixin):
         """
         Set password to a hashed password
         """
-        self.crypt = pbkdf2_sha512.hash(password)
+        if settings['PWD_CRYPT_METHOD'] == 'pbkdf2_sha256':
+            self.crypt = pbkdf2_sha256.hash(password)
+        else:
+            self.crypt = pbkdf2_sha512.hash(password)
 
     def verify_password(self, password):
         """

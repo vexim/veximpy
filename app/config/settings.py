@@ -1,10 +1,11 @@
 # app/config/config.py
 
+import copy
 import string
 
 # Some extra characters to be added to the allowed chars for passwords
 # In password rules these characters are treated like special (not isalpha) characters
-pwdcharslig = 'öäüÖÄÜß'
+pwdchars_lig = 'öäüÖÄÜß'
 
 settings = {
     'USERNAMES_SITEWIDE': 0,            # allow sitewide unique usernames (without domainpart)
@@ -17,56 +18,82 @@ settings = {
     # default settings for passwords
     # PWDLENGTHMIN is a default _and_ a minimum value
     'PWDLENGTHMIN': 10,
-    'PWDCHARSLIG': pwdcharslig, 
-    'PWDCHARSALLOWED': string.ascii_letters + string.digits + '!§%&/()=?,.-;:_ <>|\{[]}@#+*~^°' + pwdcharslig,
-    
-    # defaults for domains
-    # some of these settings in the domain table are defaults or min/max values for user account creation
-    'DOMAINDEFAULT_MAILDIR': '/var/vmail', # path for maildirs. domainname will be appended to this
-    'DOMAINDEFAULT_UID': 99,            # system uid
-    'DOMAINDEFAULT_GID': 99,            # system gid
-    'DOMAINDEFAULT_MAXACCOUNTS': 2147483647, # max. accounts; per domain
-    'DOMAINDEFAULT_QUOTAS': 500,        # MB, default quota, 0 means unlimited; per user
-    'DOMAINDEFAULT_QUOTASMAX': 1000,    # MB, max quota, 0 means unlimited; per user
-    'DOMAINDEFAULT_AVSCAN': 1,          # antivirus; per user
-    'DOMAINDEFAULT_BLOCKLISTS': 0,      # enable blocklists; per user
-    'DOMAINDEFAULT_ENABLED': 1,         # enable domain
-    'DOMAINDEFAULT_MAILINGLISTS': 0,    #
-    'DOMAINDEFAULT_MAXMSGSIZE': 5000,   # kB, max. size per message; per user
-    'DOMAINDEFAULT_PIPE': 0,            # allow pipe to command for users
-    'DOMAINDEFAULT_SPAMASSASSIN': 1,    # enable spamassassin; per user
-    'DOMAINDEFAULT_SA_TAG': 3,          # tag msg above this score; per user
-    'DOMAINDEFAULT_SA_REFUSE': 5,       # reject msg above this score; per user
-    'DOMAINDEFAULT_OUT_IP': '',         # semicolon seperated list of outgoing IPv4/6; per domain
-                                        # OUT_IP is useful if you have one IP per domain
-    'DOMAINDEFAULT_HOST_SMTP': 'mail1',
-    'DOMAINDEFAULT_HOST_IMAP': 'mail1',
-    'DOMAINDEFAULT_HOST_POP': 'mail1',
-    'DOMAINDEFAULT_RELAYTO': '',        # relay messages to this server (IP)
-    
-    
+    'PWDCHARSLIG': pwdchars_lig,
+    'PWDCHARSALLOWED': string.ascii_letters + string.digits + '!§%&/()=?,.-;:_ <>|\{[]}@#+*~^°' + pwdchars_lig,
+    'PWD_CRYPT_METHOD': 'pbkdf2_sha512',    # algorythmus for password hashing (module passlib.hash)
+
     # some defaultvalues for postmaster accounts
-    'POSTMASTER_DELETEALLOW': 0, 
-    'POSTMASTER_CHANGEUIDGID': 0, 
-    'POSTMASTERDEFAULT_QUOTA': 100,
-    'POSTMASTERDEFAULT_MAXMSGSIZE': 5000,
-    'POSTMASTERDEFAULT_ON_BLOCKLIST': 0, 
-    'POSTMASTERDEFAULT_ON_AVSCAN': 0,
-    'POSTMASTERDEFAULT_ON_SPAMASSASSIN': 1,
-    'POSTMASTERDEFAULT_SA_TAG': 5,
-    'POSTMASTERDEFAULT_SA_REFUSE': 10,
-    'POSTMASTERDEFAULT_SPAM_DROP': 1,
-    'POSTMASTERDEFAULT_ON_FORWARD': 0,
-    'POSTMASTERDEFAULT_FORWARD': '',
-    'POSTMASTERDEFAULT_UNSEEN': 0,
-    'POSTMASTERDEFAULT_ON_VACATION': 0,
-    'POSTMASTERDEFAULT_VACATION': '', 
-    'POSTMASTERDEFAULT_ROLE': 0b10000000,
-    
-    # defaults for groups
-    # https://github.com/vexim/vexim2/wiki/Group-Feature
-    'GROUPDEFAULT_IS_PUBLIC': 0, 
-    'GROUPDEFAULT_ENABLED': 1, 
+    'POSTMASTER_DELETEALLOW': 0,    # allow deletion of postmaster accounts
+    'POSTMASTER_CHANGEUIDGID': 0,   # 
+}
+
+"""
+defaults for groups
+https://github.com/vexim/vexim2/wiki/Group-Feature
+"""
+groupdefaults = {
+
+    'is_public': 0,
+    'enabled': 1,
+}
+
+"""
+defaults for domains table
+some of these settings in the domain table are defaults or min/max values for user account creation
+the keys of this dictionary correspond to the fields in the DB
+"""
+domaindefaults = {
+    'maildir': '/var/vmail',    # path for maildirs. domainname will be appended to this
+    'uid': 99,                  # system uid
+    'gid': 99,                  # system gid
+    'max_accounts': 2147483647, # max. accounts; per domain
+    'quotas': 500,              # MB, default quota, 0 means unlimited; per user
+    'quotasmax': 1000,          # MB, max quota, 0 means unlimited; per user
+    'type': 'local',            # domain type
+    'avscan': 1,                # antivirus; per user
+    'blocklists': 0,            # enable blocklists; per user
+    'enabled': 1,               # enable domain
+    'mailinglists': 0,          #
+    'maxmsgsize': 5000,         # kB, max. size per message; per user
+    'pipe': 0,                  # allow pipe to command for users
+    'spamassassin': 1,          # enable spamassassin; per user
+    'sa_tag': 3,                # tag msg above this score; per user
+    'sa_refuse': 5,             # reject msg above this score; per user
+    'out_ip': '',               # semicolon seperated list of outgoing IPv4/6; per domain
+                                # OUT_IP is useful if you have one IP per domain
+    'host_smtp': 'mail1',
+    'host_imap': 'mail1',
+    'host_pop': 'mail1',
+    'relayto': '',        # relay messages to this server (IP)
+    'pwd_charallowed': settings['PWDCHARSALLOWED'],
+    'pwd_lengthmin': settings['PWDLENGTHMIN'],
+    'pwd_rules': '255',
+}
+
+accountdefaults = {
+    'quota': domaindefaults['quotas']
+}
+
+"""
+some defaultvalues for postmaster accounts in users table
+the keys of this dictionary correspond to the fields in the DB
+"""
+postmasterdefaults = copy.deepcopy(accountdefaults)
+postmasterdefaults = {
+    'quota': 100,               # quota of the account
+    'maxmsgsize': 5000,         # max. message size per message
+    'on_blocklist': 0,          # enable blocklist
+    'on_avscan': 0,             # enable antivirus scan
+    'on_spamassassin': 1,       # enable spamassassin
+    'sa_tag': 5,                # tag messages above this score
+    'sa_refuse': 10,            # refuse messages above this score
+    'spam_drop': 1,             # drop messages above sa_refuse score
+    'on_forward': 0,            # enable forwarding of messages
+    'forward': '',              # mailadresses to forward to
+    'unseen': 0,                # disable local storage of forwarded messages
+    'on_vacation': 0,           # enable vacation message
+    'vacation': '',             # text for vacation message
+    'role': 0b10000000,         # set role to postmaster (128)
 }
 
 """
@@ -74,5 +101,5 @@ end of configuration
 """
 
 # some checks for variables in settings
-if (settings['DOMAINDEFAULT_QUOTAS'] > settings['DOMAINDEFAULT_QUOTASMAX'] or settings['DOMAINDEFAULT_QUOTAS'] == 0) and settings['DOMAINDEFAULT_QUOTASMAX'] > 0:
+if (domaindefaults['quotas'] > domaindefaults['quotasmax'] or domaindefaults['quotas'] == 0) and domaindefaults['quotasmax'] > 0:
     raise ValueError('ValueError in settings.py. (DOMAINDEFAULT_QUOTAS > DOMAINDEFAULT_QUOTASMAX or (DOMAINDEFAULT_QUOTAS == 0) and DOMAINDEFAULT_QUOTASMAX > 0)')

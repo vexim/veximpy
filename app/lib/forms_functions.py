@@ -104,7 +104,7 @@ def Username(form,  field):
 def Localpart(form,  field):
     import re
     
-    if any(not _ in settings('USERNAMES_CHARSALLOWED') for _ in field.data):
+    if any(not _ in settings['USERNAMES_CHARSALLOWED'] for _ in field.data):
         raise ValidationError('Localpart contains illegal characters.')
 
 #    if settings('CHECK_RCPT_REMOTE_LOCALPARTS'):
