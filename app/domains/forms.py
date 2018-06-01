@@ -1,4 +1,4 @@
-# app/domains/forms_domains.py
+# app/domains/forms.py
 
 from os import path
 from flask_wtf import FlaskForm

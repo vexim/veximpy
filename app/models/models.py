@@ -92,7 +92,7 @@ class Domain(db.Model):
     users = db.relationship('User', primaryjoin='User.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains1', lazy='dynamic')
     localusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "local")', cascade="save-update, merge, delete", backref='domains2', lazy='dynamic')
     aliasusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "alias")', cascade="save-update, merge, delete", backref='domains3', lazy='dynamic')
-    postmasters = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.role.op("&")(8) == 8)', backref='domains4', lazy='dynamic')
+    postmasters = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.role.op("&")(128) == 128)', backref='domains4', lazy='dynamic')
     aliases = db.relationship('Domainalia', primaryjoin='Domainalia.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains5', lazy='dynamic')
 
     @property
@@ -173,7 +173,7 @@ class User(db.Model, UserMixin):
 
     domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')
 
-    ROLE_SITEADMIN      = 0b1000000010000000 # int 32896
+    ROLE_SITEADMIN      = 0b1000000000000000 # int 32896
     ROLE_POSTMASTER     = 0b10000000 # int 128
     
     @property

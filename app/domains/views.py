@@ -1,4 +1,4 @@
-# app/domains/views_domains.py
+# app/domains/views.py
 
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
@@ -6,8 +6,8 @@ from flask_login import current_user, login_required
 #from wtforms_alchemy import model_form_factory
 from markupsafe import Markup
 #from ..config.settings import settings
-from .forms_domains import DomainFormLocal, DomainFormAlias, DomainFormRelay, DomainFormMailinglist
-from ..accounts.forms_accounts import AccountFormLocal
+from .forms import DomainFormLocal, DomainFormAlias, DomainFormRelay, DomainFormMailinglist
+from ..accounts.forms import AccountFormLocal
 from . import domains
 from ..models.models import Domain, Domainalia, User
 from ..app import require_siteadmin,  db

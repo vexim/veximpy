@@ -1,4 +1,4 @@
-# app/accounts/forms_accounts.py
+# app/accounts/forms.py
 
 from os import path
 from flask_wtf import FlaskForm

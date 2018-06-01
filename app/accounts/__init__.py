@@ -4,5 +4,5 @@ from flask import Blueprint
 
 accounts = Blueprint('accounts', __name__, template_folder='templates/accounts')
 
-from . import views_accounts
+from . import views
 

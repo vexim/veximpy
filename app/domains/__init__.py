@@ -4,4 +4,4 @@ from flask import Blueprint
 
 domains = Blueprint('domains', __name__, template_folder='templates/domains')
 
-from . import views_domains
+from . import views

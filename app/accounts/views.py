@@ -1,11 +1,11 @@
-# app/accounts/views_accounts.py
+# app/accounts/views.py
 
 #import sys
 #from sqlalchemy.sql import or_, and_, tuple_
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from markupsafe import Markup
-from .forms_accounts import AccountFormLocal
+from .forms import AccountFormLocal
 from . import accounts
 from ..models.models import Domain, User
 from app.app import require_postmaster, db, session_domain_id

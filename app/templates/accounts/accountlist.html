@@ -7,13 +7,13 @@
 <script class="init" type="text/javascript">
     $(document).ready(function() {
          $('#localtable').DataTable( {
-              "columnDefs": [
-                  { "orderable": false, "targets": [ 4, 5, 6, 7, 8, 9, 10 ] }
-              ]
+              "dom": 'Blfrtip',
+              "buttons": [ 'copy', 'excel', 'pdf' ],
+              "columnDefs": [ { "orderable": false, "targets": [ 8, 9, 10 ] } ]
          } );
          $('#aliastable').DataTable( {
               "columnDefs": [
-                  { "orderable": false, "targets": [ 3, 4, 5, 6 ] }
+                  { "orderable": false, "targets": [ 4, 5, 6 ] }
               ]
          } );
     } );
@@ -32,7 +32,7 @@
             </a>
           </div>
           <div class="center table-responsive-sm">
-            <table id="{{ accounttype }}table" class="table table-sm table-striped table-bordered table-hover rotate-75">
+            <table id="{{ accounttype }}table" class="table table-sm table-striped table-bordered table-hover rotate-75 display">
                 <caption>List of accounts</caption>
                 <colgroup>
                     <col span="1" style="width: *;">
