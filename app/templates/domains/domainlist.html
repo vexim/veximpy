@@ -4,6 +4,25 @@
 {% extends "base.html" %}
 {% block title %}Domains{% endblock %}
 {% block body %}
+<script class="init" type="text/javascript">
+    $(document).ready(function() {
+         $('#localtable').DataTable( {
+              "columnDefs": [
+                  { "orderable": false, "targets": [ 4, 5, 6, 7, 8 ] }
+              ]
+         } );
+         $('#aliastable').DataTable( {
+              "columnDefs": [
+                  { "orderable": false, "targets": [ 2, 3, 4 ] }
+              ]
+         } );
+         $('#relaytable').DataTable( {
+              "columnDefs": [
+                  { "orderable": false, "targets": [ 1, 2, 3 ] }
+              ]
+         } );
+    } );
+</script>
 <div class="content-section">
   <div class="outer">
     <div class="middle">
@@ -18,7 +37,7 @@
             </a>
           </div>
           <div class="center table-responsive-sm">
-            <table class="table table-sm table-striped table-bordered table-hover rotate-75">
+            <table id="{{ domaintype }}table" class="table table-sm table-striped table-bordered table-hover rotate-75">
                 <caption>List of domains</caption>
                 <colgroup>
                     <col span="1" style="width: *;">
