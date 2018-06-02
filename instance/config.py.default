@@ -11,10 +11,13 @@ VEXIMDB_HOST            = 'localhost'
 VEXIMDB_PORT            = '3306'
 VEXIMDB_SCHEMA          = 'veximtest'       # should exist
 VEXIMDB_SCHEMA_TESTS    = 'veximtest_test'  # should exist
+VEXIMDB_CHARSET         = 'utf8mb4'
 
 # other config
 SECRET_KEY              = ''
 
+ENV_FLASK_CONFIG        = 'production'
+#ENV_FLASK_CONFIG        = 'development'
 
 # end of config
 # it should NOT be necessary to touch following:
@@ -23,10 +26,10 @@ SQLALCHEMY_DATABASE_URI = VEXIMDB_DESIGNATOR + '://' \
     + VEXIMDB_USER + ':' + VEXIMDB_PASS \
     + '@' + VEXIMDB_HOST + ':' + VEXIMDB_PORT \
     + '/' + VEXIMDB_SCHEMA \
-    + '?charset=utf8mb4'
+    + '?charset=' + VEXIMDB_CHARSET
 
 SQLALCHEMY_DATABASE_URI_TESTS = VEXIMDB_DESIGNATOR + '://' \
     + VEXIMDB_USER + ':' + VEXIMDB_PASS \
     + '@' + VEXIMDB_HOST + ':' + VEXIMDB_PORT \
     + '/' + VEXIMDB_SCHEMA_TESTS \
-    + '?charset=utf8mb4'
+    + '?charset=' + VEXIMDB_CHARSET

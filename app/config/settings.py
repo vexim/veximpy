@@ -1,4 +1,4 @@
-# app/config/config.py
+# app/config/settings.py
 
 import copy
 import string

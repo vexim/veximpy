@@ -21,7 +21,8 @@ If a domain/server name is provided as first parameter it will be used for the n
 
 You have to **edit the DB credencials** and set **SECRET\_KEY** in `instance/config.py`.
 
-In `wsgi.py` set the correct **path** and **os.environ['FLASK_CONFIG'] = 'production'**
+In `wsgi.py` set **os.environ['FLASK_CONFIG'] = 'production'**
+
 ## Install a new vexim DB
 
 Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.

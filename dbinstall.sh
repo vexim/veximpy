@@ -5,6 +5,10 @@ if [[ -d "$(dirname ${0})migrations" ]]; then
     exit
 fi
 
+if [[ ! -f "$(dirname ${0})instance/config.py" ]]; then
+    echo "Config file is missing: $(dirname ${0})instance/config.py"
+fi
+
 if [[ -z "${1}" ]]; then
     SQL_SCHEMA="veximtest"
 else
