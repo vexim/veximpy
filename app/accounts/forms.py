@@ -2,9 +2,11 @@
 
 from os import path
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, PasswordField, SelectField, StringField, SubmitField, TextAreaField
-from ..lib.forms_functions import TextAreaSepListField, IPList, PasswordRules, URI, Localpart,  Username, bool_checked
-from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
+from wtforms import BooleanField, IntegerField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms.validators import EqualTo, Length, NumberRange, Optional
+from ..lib.forms_fields import TextAreaSepListField
+from ..lib.forms_functions import bool_checked
+from ..lib.forms_validators import Localpart, Username, PasswordRules
 from ..models.models import Domain #, User
 from ..config.settings import domaindefaults, postmasterdefaults, settings
 

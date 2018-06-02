@@ -4,13 +4,14 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 #from wtforms.validators import DataRequired
 #from wtforms_alchemy import model_form_factory
+from werkzeug import MultiDict
 from markupsafe import Markup
-#from ..config.settings import settings
 from .forms import DomainFormLocal, DomainFormAlias, DomainFormRelay, DomainFormMailinglist
 from ..accounts.forms import AccountFormLocal
 from . import domains
 from ..models.models import Domain, Domainalia, User
 from ..app import require_siteadmin,  db
+from ..config.settings import domaindefaults
 
 domainlist_title = {'local': 'Local', 'alias': 'Alias', 'relay': 'Relay'}
 
@@ -89,6 +90,9 @@ def domains_add(domaintype):
         form = DomainFormRelay(action='add')
     elif domaintype == 'list':
         form = DomainFormMailinglist(action='add')
+
+    if form and request.method == 'GET':
+        form.process(MultiDict(domaindefaults))
 
     if form.submitcancel.data:
         return redirect(url_for('domains.domainlist', domaintype=domaintype))

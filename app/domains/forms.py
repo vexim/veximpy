@@ -4,8 +4,9 @@ from os import path
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, PasswordField, SelectField, StringField, SubmitField
 from wtforms_components import read_only
-from ..lib.forms_functions import TextAreaSepListField, IPList, PasswordRules, URI, DomainExists, bool_checked
 from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
+from ..lib.forms_fields import TextAreaSepListField
+from ..lib.forms_validators import IPList, PasswordRules, URI, DomainExists, QuotaDomains
 #from markupsafe import Markup
 from ..config.settings import domaindefaults, settings
 
@@ -56,32 +57,32 @@ class DomainFormLocal(FlaskForm):
     pwdcharallowed = settings['PWDCHARSALLOWED']
     pwdlengthmin = settings['PWDLENGTHMIN']
 
-    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
     domain = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
-    maildir = StringField('Maildir base path. Domain name will be appended.', description='You can <b>not</b> change this later.', default='/var/vmail/', validators=[Length(min=3, max=4096)])
+    maildir = StringField('Maildir base path. Domain name will be appended.', description='You can <b>not</b> change this later.', validators=[Length(min=3, max=4096)])
     password1 = PasswordField('Password for postmaster account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')
-    uid = IntegerField('System UID', default=domaindefaults['uid'], validators=[NumberRange(min=99, max=65535)])
-    gid = IntegerField('System GID', default=domaindefaults['gid'], validators=[NumberRange(min=99, max=65535)])
-    max_accounts = IntegerField('Max. Accounts', default=domaindefaults['max_accounts'], validators=[NumberRange(min=1, max=2147483647)])
-    quotas = IntegerField('Default quota for each account [MB]. 0 means unlimited', default=domaindefaults['quotas'], validators=[NumberRange(min=0, max=2147483647)])
-    quotasmax = IntegerField('Max. quota for each account [MB]. 0 means unlimited', default=domaindefaults['quotasmax'], validators=[NumberRange(min=0, max=2147483647)])
-    maxmsgsize = IntegerField('Max. message size [kB]', description='The maximum size for incoming mail (user tunable)', default=5000, validators=[NumberRange(min=1000, max=2147483647)])
-    #type = StringField('Domain type', default = 'local', validators=[DataRequired(), Length(min=1, max=5)])
-    avscan = BooleanField('Anti virus scan', description='Run anti virus scan on mails.', default=bool_checked(domaindefaults['avscan']), false_values={0, False, 'false', ''})
-    spamassassin = BooleanField('Spam check', description='Run spamassassin on mails.', default=bool_checked(domaindefaults['spamassassin']), false_values={0, False, 'false', ''})
-    sa_tag = IntegerField('Tag spam above this score', description='Above this score the "X-Spam-Flag: YES" header will be added.', default=domaindefaults['sa_tag'], validators=[NumberRange(min=0, max=99)])
-    sa_refuse = IntegerField('Refuse spam above this score', default=domaindefaults['sa_refuse'], validators=[NumberRange(min=0, max=99)])
+    uid = IntegerField('System UID', validators=[NumberRange(min=99, max=65535)])
+    gid = IntegerField('System GID', validators=[NumberRange(min=99, max=65535)])
+    max_accounts = IntegerField('Max. Accounts', validators=[NumberRange(min=1, max=2147483647)])
+    quotas = IntegerField('Default quota for each account [MB]. 0 means unlimited', validators=[QuotaDomains, NumberRange(min=0, max=2147483647)])
+    quotasmax = IntegerField('Max. quota for each account [MB]. 0 means unlimited', validators=[QuotaDomains, NumberRange(min=0, max=2147483647)])
+    maxmsgsize = IntegerField('Max. message size [kB]', description='The maximum size for incoming mail (user tunable)', validators=[NumberRange(min=1000, max=2147483647)])
+    #type = StringField('Domain type', validators=[DataRequired(), Length(min=1, max=5)])
+    avscan = BooleanField('Anti virus scan', description='Run anti virus scan on mails.', false_values={0, False, 'false', ''})
+    spamassassin = BooleanField('Spam check', description='Run spamassassin on mails.', false_values={0, False, 'false', ''})
+    sa_tag = IntegerField('Tag spam above this score', description='Above this score the "X-Spam-Flag: YES" header will be added.', validators=[NumberRange(min=0, max=99)])
+    sa_refuse = IntegerField('Refuse spam above this score', validators=[NumberRange(min=0, max=99)])
     #blocklists = 
     #mailinglists = 
-    pipe = BooleanField('Allow piping mails to programs', default=bool_checked(domaindefaults['pipe']), false_values={0, False, 'false', ''})
-    out_ip = TextAreaSepListField('Outgoing IPs. List of IPv4/IPv6 addresses. One per line.', default=domaindefaults['out_ip'], validators=[Length(min=0, max=255), IPList], separator=' ; ', render_kw={"rows": 5, "cols": 255})
-    host_smtp = StringField('SMTP host', default=domaindefaults['host_smtp'], validators=[DataRequired(), Length(min=2, max=64)])
-    host_imap = StringField('IMAP host', default=domaindefaults['host_imap'], validators=[DataRequired(), Length(min=2, max=64)])
-    host_pop = StringField('POP3 host', default=domaindefaults['host_pop'], validators=[DataRequired(), Length(min=2, max=64)])
-    relayto = StringField('Relay mails to IP', default=domaindefaults['relayto'], validators=[Optional(), IPAddress(ipv4=True, ipv6=True)])
-    pwd_charallowed = StringField('Allowed password characters', default=domaindefaults['pwd_charallowed'], validators=[Length(min=64, max=255)])
-    pwd_lengthmin = IntegerField('Minimum length for passwords', default=domaindefaults['pwd_lengthmin'], validators=[NumberRange(min=domaindefaults['pwd_lengthmin'], max=2147483647)])
+    pipe = BooleanField('Allow piping mails to programs', false_values={0, False, 'false', ''})
+    out_ip = TextAreaSepListField('Outgoing IPs. List of IPv4/IPv6 addresses. One per line.', validators=[Length(min=0, max=255), IPList], separator=' ; ', render_kw={"rows": 5, "cols": 255})
+    host_smtp = StringField('SMTP host', validators=[DataRequired(), Length(min=2, max=64)])
+    host_imap = StringField('IMAP host', validators=[DataRequired(), Length(min=2, max=64)])
+    host_pop = StringField('POP3 host', validators=[DataRequired(), Length(min=2, max=64)])
+    relayto = StringField('Relay mails to IP', validators=[Optional(), IPAddress(ipv4=True, ipv6=True)])
+    pwd_charallowed = StringField('Allowed password characters', validators=[Length(min=64, max=255)])
+    pwd_lengthmin = IntegerField('Minimum length for passwords', validators=[NumberRange(min=domaindefaults['pwd_lengthmin'], max=2147483647)])
     #pwd_rules
 
     submitadd = SubmitField('Add domain')
@@ -109,12 +110,12 @@ class DomainFormAlias(FlaskForm):
             return True
         return False
 
-    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
     alias = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
     domain_id = SelectField('Redirect mails to', coerce=int)
-    host_smtp = StringField('SMTP host', default='mail', validators=[DataRequired(), Length(min=2, max=64)])
-    host_imap = StringField('IMAP host', default='mail', validators=[DataRequired(), Length(min=2, max=64)])
-    host_pop = StringField('POP3 host', default='mail', validators=[DataRequired(), Length(min=2, max=64)])
+    host_smtp = StringField('SMTP host', validators=[DataRequired(), Length(min=2, max=64)])
+    host_imap = StringField('IMAP host', validators=[DataRequired(), Length(min=2, max=64)])
+    host_pop = StringField('POP3 host', validators=[DataRequired(), Length(min=2, max=64)])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
     submitcancel = SubmitField('Cancel')
@@ -140,7 +141,7 @@ class DomainFormRelay(FlaskForm):
             return True
         return False
 
-    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
     domain = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
