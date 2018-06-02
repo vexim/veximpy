@@ -19,8 +19,9 @@ This creates a virtual environment under `venv` and modified templates for nginx
 
 If a domain/server name is provided as first parameter it will be used for the nginx template. 
 
-You have to **edit the DB credencials** in `instance/config.py`.
+You have to **edit the DB credencials** and set **SECRET\_KEY** in `instance/config.py`.
 
+In `wsgi.py` set the correct **path** and **os.environ['FLASK_CONFIG'] = 'production'**
 ## Install a new vexim DB
 
 Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.
@@ -54,6 +55,10 @@ More information can be found inside the `dbreinit.sh` script file.
 Even an example for creating a dump from your original vexim DB.
 
 ## NGINX, UWSGI
+
+Install nginx and uwsgi
+
+`apt install nginx-full uwsgi uwsgi-plugin-python3`
 
 Sample files can be found under the `doc` directory.
 

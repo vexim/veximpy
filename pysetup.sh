@@ -1,6 +1,8 @@
 #!/bin/bash
 
+sudo apt install python3 python3-venv python3-pip
 python3 -m venv venv
+. venv/bin/activate
 pip3 install -r requirements.txt
 ln -s venv/bin/activate
 echo "export FLASK_CONFIG=development; export FLASK_APP=run.py; export PYTHONPATH=${PYTHONPATH}:$(dirname ${0})" >> activate

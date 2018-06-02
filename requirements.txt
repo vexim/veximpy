@@ -31,7 +31,6 @@ mock==2.0.0
 more-itertools==4.1.0
 passlib==1.7.1
 pbr==4.0.2
-pkg-resources==0.0.0
 pluggy==0.6.0
 py==1.5.3
 PyMySQL==0.8.0
