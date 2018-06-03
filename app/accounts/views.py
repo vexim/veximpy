@@ -6,7 +6,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from werkzeug import MultiDict
 from markupsafe import Markup
-from .forms import AccountFormLocal, AccountFormAlias, AccountFormMailinglist
+from .forms import AccountFormLocal, AccountFormAlias #, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
 from app.app import require_postmaster, db, session_domain_id
@@ -15,10 +15,6 @@ from ..config.settings import settings, domaindefaults
 #from ..back import back
 
 accountlist_title = {'local': 'Local', 'alias': 'Alias'} #, 'list': 'Mailinglist'}
-
-def domain_name2id(domainname):
-    d = Domain.query.filter_by(domain=domainname)
-    return d.id
 
 @accounts.route('/accountlist/<int:domainid>/<accounttype>/')
 @accounts.route('/accountlist/<int:domainid>/',  defaults={'accounttype': 'local'})
@@ -87,14 +83,13 @@ def account_add(domainid, accounttype):
     Render the homepage template on the / route
     """
 
+    require_postmaster(domainid)
+    add_account = True
+
     if accounttype not in accountlist_title:
         flash(Markup('We don\'t know the accounttype <b>' + accounttype + '</b>.'), 'error')
         # redirect to domainlist page
         return redirect(url_for('accounts.accountlist', domainid=domainid, accounttype='local'))
-
-    add_account = True
-
-    require_postmaster(domainid)
 
     domain = Domain.query.get_or_404(domainid)
     account = User()

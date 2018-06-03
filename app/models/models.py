@@ -113,6 +113,12 @@ class Domain(db.Model):
                 return True
         return False
 
+    def id2name(domainid):
+        return Domain.query.filter_by(domain_id=domainid).one().domain
+        
+    def name2id(domainname):
+        return Domain.query.filter_by(domain=domainname).one().id
+
     def __repr__(self):
         return '{}'.format(self.domain)
 

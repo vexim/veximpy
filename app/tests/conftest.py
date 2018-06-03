@@ -6,15 +6,15 @@ import pytest
 #from mock import Mock
 
 from instance import config
-from app.config.settings import sitedomaindefaults, siteadmindefaults, postmasterdefaults, domaindefaults, accountdefaults
+from app.config.settings import sitedomaindefaults, siteadmindefaults, postmasterdefaults, domaindefaults, aliasdomaindefaults, accountdefaults
 from app.app import create_app
 from app.app import db as _db
-from app.lib.tests import settings as test_settings
+from app.config.tests import settings as test_settings
 
 
 #import pdb
 
-from app.models.models import Domain, User
+from app.models.models import Domain, Domainalia, User
 
 @pytest.yield_fixture(scope='session')
 def app():
@@ -62,9 +62,7 @@ def db(app):
     _db.drop_all()
     _db.create_all()
 
-    # Create a single user because a lot of tests do not mutate this user.
-    # It will result in faster tests.
-    
+    # Create site and siteadmin
     domain = Domain(**sitedomaindefaults)
     _db.session.add(domain)
 
@@ -72,23 +70,60 @@ def db(app):
     siteadmin.password_set(test_settings['TEST_PW_SITEADMIN'])
     _db.session.add(siteadmin)
 
+    # Create a local domain for testing
     domain = Domain(**domaindefaults)
-    domain.domain_id = 2
+    domain.domain_id = test_settings['TEST_2_DOMAINID']
+    domain.domain = test_settings['TEST_2_DOMAINNAME']
+    domain.type = test_settings['TEST_2_DOMAINTYPE']
     _db.session.add(domain)
 
     postmaster = User(**postmasterdefaults)
-    postmaster.domain_id = 2
-    postmaster.localpart = 'postmaster'
-    postmaster.username = 'postmaster@runout.at'
-    postmaster.password_set(test_settings['TEST_PW_POSTMASTER'])
+    postmaster.domain_id = test_settings['TEST_2_DOMAINID']
+    postmaster.localpart = test_settings['TEST_2_USER_POSTMASTER']
+    postmaster.username = test_settings['TEST_2_USER_POSTMASTER'] + '@' + test_settings['TEST_2_DOMAINNAME']
+    postmaster.password_set(test_settings['TEST_2_PW_POSTMASTER'])
     _db.session.add(postmaster)
 
     user = User(**accountdefaults)
-    user.domain_id = 2
-    user.localpart = 'user1'
-    user.username = 'user1@runout.at'
-    user.password_set(test_settings['TEST_PW_USER'])
+    user.domain_id = test_settings['TEST_2_DOMAINID']
+    user.localpart = test_settings['TEST_2_USER_USER']
+    user.username = test_settings['TEST_2_USER_USER'] + '@' + test_settings['TEST_2_DOMAINNAME']
+    user.password_set(test_settings['TEST_2_PW_USER'])
     _db.session.add(user)
+
+    # Create a local domain for testing with alias domain
+    domain = Domain(**domaindefaults)
+    domain.domain_id = test_settings['TEST_3_DOMAINID']
+    domain.domain = test_settings['TEST_3_DOMAINNAME']
+    domain.type = test_settings['TEST_3_DOMAINTYPE']
+    _db.session.add(domain)
+
+    postmaster = User(**postmasterdefaults)
+    postmaster.domain_id = test_settings['TEST_3_DOMAINID']
+    postmaster.localpart = test_settings['TEST_3_USER_POSTMASTER']
+    postmaster.username = test_settings['TEST_3_USER_POSTMASTER'] + '@' + test_settings['TEST_3_DOMAINNAME']
+    postmaster.password_set(test_settings['TEST_3_PW_POSTMASTER'])
+    _db.session.add(postmaster)
+
+    user = User(**accountdefaults)
+    user.domain_id = test_settings['TEST_3_DOMAINID']
+    user.localpart = test_settings['TEST_3_USER_USER']
+    user.username = test_settings['TEST_3_USER_USER'] + '@' + test_settings['TEST_3_DOMAINNAME']
+    user.password_set(test_settings['TEST_3_PW_USER'])
+    _db.session.add(user)
+
+    domain = Domainalia(**aliasdomaindefaults)
+    domain.domainalias_id = test_settings['TEST_3_DOMAINALIASID']
+    domain.domain_id = test_settings['TEST_2_DOMAINID']
+    domain.alias = test_settings['TEST_3_DOMAINALIASNAME']
+    _db.session.add(domain)
+
+    # Create a relay domain for testing
+    domain = Domain(**domaindefaults)
+    domain.domain_id = test_settings['TEST_4_DOMAINRELAYID']
+    domain.type = test_settings['TEST_4_DOMAINTYPE']
+    domain.domain = test_settings['TEST_4_DOMAINRELAYNAME']
+    _db.session.add(domain)
 
     _db.session.commit()
 
