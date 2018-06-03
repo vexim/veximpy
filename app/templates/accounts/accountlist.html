@@ -135,7 +135,7 @@
                     </a>
                   </td>
                   <td style="text-align:center;" title="You can not delete an enabled account or a postmaster account">
-                    {% if (not account.enabled) and (accounttype!='local' or account.id>1) and (not account.is_postmaster or postmasterdeleteallow == 1) and (not account.is_siteadmin) %}
+                    {% if account.is_deleteable %}
                         <a href="{{ url_for('accounts.account_delete', accountid=account.id, accounttype=accounttype) }}">
                             <i class="far fa-trash-alt"></i> 
                         </a>

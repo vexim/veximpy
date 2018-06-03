@@ -19,6 +19,7 @@ SECRET_KEY              = ''
 ENV_FLASK_CONFIG        = 'production'
 #ENV_FLASK_CONFIG        = 'development'
 
+
 # end of config
 # it should NOT be necessary to touch following:
 

@@ -144,7 +144,7 @@
                     </a>
                   </td>
                   <td style="text-align:center;">
-                    {% if (not domain.enabled) and domain.id>1 and (not domaintype=='local' or (2>(domain.users.count() | int) and 0==(domain.aliases.count() | int))) %}
+                    {% if domain.is_deleteable %}
                         <a href="{{ url_for('domains.domains_delete', domainid=domain.id, domaintype=domaintype) }}">
                             <i class="far fa-trash-alt"></i> 
                         </a>

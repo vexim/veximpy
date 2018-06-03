@@ -19,7 +19,7 @@
             {% if add_domain %}
                 <h1>{{ title }}</h1>
             {% else %}
-                <h1>Edit Domain {{ domainname }}</h1>
+                <h1>{{ title }} <b>{{ domainname }}</b></h1>
             {% endif %}
             <br/>
             {{ wtf.quick_form(form) }}

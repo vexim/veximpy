@@ -25,7 +25,7 @@ class DevelopmentConfig(Config):
 
     DEBUG = 1
     #TESTING = True
-    SQLALCHEMY_ECHO = True
+    #SQLALCHEMY_ECHO = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SERVER_NAME = 'veximpy.runout.at'
 

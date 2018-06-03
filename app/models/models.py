@@ -103,6 +103,16 @@ class Domain(db.Model):
     def domainname(self):
         return(self.domain)
 
+    @property
+    def is_deleteable(self):
+        if self.enabled == 0 and self.id>1:
+            if not self.type == 'local':
+                print('local')
+                return True
+            if  self.aliases.count() == 0 and self.postmasters.count() == self.users.count():
+                return True
+        return False
+
     def __repr__(self):
         return '{}'.format(self.domain)
 
@@ -173,9 +183,6 @@ class User(db.Model, UserMixin):
 
     domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')
 
-    ROLE_SITEADMIN      = 0b1000000000000000 # int 32896
-    ROLE_POSTMASTER     = 0b10000000 # int 128
-    
     @property
     def id(self):
         return(self.user_id)
@@ -194,13 +201,23 @@ class User(db.Model, UserMixin):
 
     @property
     def is_siteadmin(self):
-        return(self.role & self.ROLE_SITEADMIN)
+        return(self.role & settings['ROLE_SITEADMIN'] == settings['ROLE_SITEADMIN'])
 
+    # returns the domain_id if its a postmaster otherwise 0
     @property
     def is_postmaster(self):
-        if self.domains.enabled and (self.role & self.ROLE_POSTMASTER):
+        if self.role & settings['ROLE_POSTMASTER'] == settings['ROLE_POSTMASTER']:
             return self.domain_id
         return 0
+
+    @property
+    def is_deleteable(self):
+        if self.is_siteadmin:
+            return False
+        if self.enabled == 0 and self.id>1:
+            if self.is_postmaster == 0 or settings['POSTMASTER_DELETEALLOW'] == 1:
+                return True
+        return False
 
 #    @property
 #    def password(self):

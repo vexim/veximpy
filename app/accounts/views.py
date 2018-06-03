@@ -4,16 +4,17 @@
 #from sqlalchemy.sql import or_, and_, tuple_
 from flask import abort, flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from werkzeug import MultiDict
 from markupsafe import Markup
-from .forms import AccountFormLocal
+from .forms import AccountFormLocal, AccountFormAlias, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
 from app.app import require_postmaster, db, session_domain_id
-from ..config.settings import settings
+from ..config.settings import settings, domaindefaults
 
 #from ..back import back
 
-accountlist_title = {'local': 'Local', 'alias': 'Alias', 'list': 'Mailinglist'}
+accountlist_title = {'local': 'Local', 'alias': 'Alias'} #, 'list': 'Mailinglist'}
 
 def domain_name2id(domainname):
     d = Domain.query.filter_by(domain=domainname)
@@ -39,7 +40,8 @@ def accountlist(domainid, accounttype):
         domainid = session_domain_id
         if session_domain_id < 1:
             abort(404)
-    domain = Domain.query.filter_by(domain_id=domainid).one()
+
+    domain = Domain.query.get_or_404(domainid)
 
     accountlist = (User.query.filter_by(domain_id=domainid)
                              .filter(User.type.in_(accounttype_list)).order_by(User.localpart))
@@ -85,6 +87,11 @@ def account_add(domainid, accounttype):
     Render the homepage template on the / route
     """
 
+    if accounttype not in accountlist_title:
+        flash(Markup('We don\'t know the accounttype <b>' + accounttype + '</b>.'), 'error')
+        # redirect to domainlist page
+        return redirect(url_for('accounts.accountlist', domainid=domainid, accounttype='local'))
+
     add_account = True
 
     require_postmaster(domainid)
@@ -94,8 +101,15 @@ def account_add(domainid, accounttype):
 
     if accounttype == 'local':
         form = AccountFormLocal(action='add', domain=domain)
+    elif accounttype == 'alias':
+        form = AccountFormAlias(action='add', domain=domain)
+#    elif accounttype == 'list':
+#        form = AccountFormMailinglist(action='add', domain=domain)
 
-    accountname = form.username.data
+    if request.method == 'GET':
+        form.process(MultiDict(domaindefaults))
+        accountname = form.username.data
+
     if request.method == 'POST':
         if form.account_save(account):
             try:
@@ -165,7 +179,7 @@ def account_delete(accountid, accounttype):
     username = account.username
     domainid = account.domain_id
 
-    if account.enabled == 0 and account.id > 1 and (not account.is_postmaster or settings['POSTMASTER_DELETEALLOW'] == 1):
+    if account.is_deleteable:
         db.session.delete(account)
         db.session.commit()
         flash(Markup('You have successfully deleted the account <b>' + username + '</b>.'), 'warning')

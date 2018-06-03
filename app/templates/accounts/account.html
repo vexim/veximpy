@@ -1,4 +1,4 @@
-<!-- app/templates/domains/domain.html -->
+<!-- app/templates/accounts/account.html -->
 
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "bootstrap/utils.html" as utils %}
@@ -17,9 +17,9 @@
       <div class="inner">
         <div class="center">
             {% if add_account %}
-                <h1>Add Account</h1>
+                <h1>{{ title }}</h1>
             {% else %}
-                <h1>Edit Account {{ accountname }}</h1>
+                <h1>{{ title }} <b>{{ accountname }}</b></h1>
             {% endif %}
             <br/>
             {{ wtf.quick_form(form) }}
