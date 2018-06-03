@@ -19,15 +19,11 @@ from ..lib.decorators import domaintyp_required, siteadmin_required
 @domains.route('/domainlist/', defaults={'domaintype': 'local'})
 @siteadmin_required
 @login_required
+@domaintyp_required
 def domainlist(domaintype):
     """
     Render the homepage template on the /domains_alias route
     """
-
-    #require_siteadmin()
-
-    if domaintype not in domainlist_title:
-        domaintype = 'local'
 
     if domaintype == 'alias':
         domainlist = Domainalia.query.order_by(Domainalia.alias).all()
@@ -47,8 +43,6 @@ def domains_enabled(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
-
-    #require_siteadmin()
 
     try:
         if domaintype == 'alias':
@@ -76,16 +70,13 @@ def domains_enabled(domainid, domaintype):
 @domains.route('/domains_add/',  defaults={'domaintype': 'local'}, methods=['GET', 'POST'])
 @siteadmin_required
 @login_required
+@domaintyp_required
 def domains_add(domaintype):
     """
     Render the homepage template on the / route
     """
 
-    #require_siteadmin()
     add_domain = True
-
-    if domaintype not in domainlist_title:
-        domaintype = 'local'
 
     if domaintype == 'local':
         form = DomainFormLocal(obj=Domain(**domaindefaults), action='add')
@@ -177,7 +168,7 @@ def domains_edit(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
-    #require_siteadmin()
+
     add_domain = False
 
     # create DB object for domain
@@ -235,12 +226,11 @@ def domains_edit(domainid, domaintype):
 @domains.route('/domains_delete/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @siteadmin_required
 @login_required
+@domaintyp_required
 def domains_delete(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
-
-    #require_siteadmin()
 
     if domaintype == 'alias':
         domain = Domainalia.query.get_or_404(domainid)

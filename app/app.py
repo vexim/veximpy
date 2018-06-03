@@ -19,21 +19,6 @@ login_manager = LoginManager()
 session_domain_id = 0
 session_domainname = ''
 
-#def require_siteadmin():
-#    """
-#    Prevent non-siteadmins from accessing the page
-#    """
-#    if not current_user.is_siteadmin:
-#        abort(403)
-#
-#def require_postmaster(domainid):
-#    """
-#    Prevent non-postmasters from accessing the page
-#    """
-#    if not (current_user.is_postmaster == domainid
-#            or current_user.is_siteadmin):
-#        abort(403)
-
 def create_app(config_name,  settings_override=None):
 
     global session_domain_id

@@ -23,7 +23,9 @@ settings = {
 
     # some defaultvalues for postmaster accounts
     'POSTMASTER_DELETEALLOW': 0,    # allow deletion of postmaster accounts
-    'POSTMASTER_CHANGEUIDGID': 0,   # 
+    'POSTMASTER_CHANGEUIDGID': 0,   #
+    
+    'SITEADMIN_ALLOWMANAGEACCOUNTS': 1, # allow siteadmins to manage accounts
     
     'ROLE_SITEADMIN':   0b1000000000000000,   # int 32896
     'ROLE_POSTMASTER':          0b10000000,   # int 128'

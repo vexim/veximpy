@@ -16,6 +16,24 @@ def assert_status_with_message(status_code=200, response=None, message=None):
     assert response.status_code == status_code
     assert message in str(response.data)
 
+def assert_status_with_flashmessage(status_code=200, response=None, client=None, message=None, category='message'):
+    """
+    Check to see if a flash message is contained within a response.
+
+    :param status_code: Status code that defaults to 200
+    :type status_code: int
+    :param response: Flask response
+    :type response: str
+    :param message: String to check for
+    :type message: str
+    :return: None
+    """
+    assert response.status_code == status_code
+
+    with client.session_transaction() as session:
+        flash_message = dict(session['_flashes']).get(category)
+    assert message in flash_message
+
 
 class ViewTestMixin(object):
     """

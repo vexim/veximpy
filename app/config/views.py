@@ -6,10 +6,12 @@ from markupsafe import Markup
 #from .forms import LoginForm, RegistrationForm
 from app.app import db
 #from ..models.models import User
+from ..lib.decorators import siteadmin_required
 
 from . import config
 
 @config.route('/siteconfig', methods=['GET', 'POST'])
+@siteadmin_required
 @login_required
 def siteconfig():
     """
@@ -17,6 +19,5 @@ def siteconfig():
     Add an user to the database through the registration form
     """
 
-    require_siteadmin()
     # load configuration template
     return render_template('/config/siteconfig.html', form=form, title='Site Configuration')

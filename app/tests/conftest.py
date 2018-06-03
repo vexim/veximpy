@@ -79,15 +79,15 @@ def db(app):
 
     postmaster = User(**postmasterdefaults)
     postmaster.domain_id = test_settings['TEST_2_DOMAINID']
-    postmaster.localpart = test_settings['TEST_2_USER_POSTMASTER']
-    postmaster.username = test_settings['TEST_2_USER_POSTMASTER'] + '@' + test_settings['TEST_2_DOMAINNAME']
+    postmaster.localpart = test_settings['TEST_2_POSTMASTER_LOCALPART']
+    postmaster.username = test_settings['TEST_2_USER_POSTMASTER']
     postmaster.password_set(test_settings['TEST_2_PW_POSTMASTER'])
     _db.session.add(postmaster)
 
     user = User(**accountdefaults)
     user.domain_id = test_settings['TEST_2_DOMAINID']
-    user.localpart = test_settings['TEST_2_USER_USER']
-    user.username = test_settings['TEST_2_USER_USER'] + '@' + test_settings['TEST_2_DOMAINNAME']
+    user.localpart = test_settings['TEST_2_USER_LOCALPART']
+    user.username = test_settings['TEST_2_USER_USER']
     user.password_set(test_settings['TEST_2_PW_USER'])
     _db.session.add(user)
 
@@ -100,15 +100,15 @@ def db(app):
 
     postmaster = User(**postmasterdefaults)
     postmaster.domain_id = test_settings['TEST_3_DOMAINID']
-    postmaster.localpart = test_settings['TEST_3_USER_POSTMASTER']
-    postmaster.username = test_settings['TEST_3_USER_POSTMASTER'] + '@' + test_settings['TEST_3_DOMAINNAME']
+    postmaster.localpart = test_settings['TEST_3_POSTMASTER_LOCALPART']
+    postmaster.username = test_settings['TEST_3_USER_POSTMASTER']
     postmaster.password_set(test_settings['TEST_3_PW_POSTMASTER'])
     _db.session.add(postmaster)
 
     user = User(**accountdefaults)
     user.domain_id = test_settings['TEST_3_DOMAINID']
-    user.localpart = test_settings['TEST_3_USER_USER']
-    user.username = test_settings['TEST_3_USER_USER'] + '@' + test_settings['TEST_3_DOMAINNAME']
+    user.localpart = test_settings['TEST_3_USER_LOCALPART']
+    user.username = test_settings['TEST_3_USER_USER']
     user.password_set(test_settings['TEST_3_PW_USER'])
     _db.session.add(user)
 

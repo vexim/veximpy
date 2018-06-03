@@ -1,7 +1,7 @@
 # app/tests/accounts/test_views.py
 
 from flask import url_for
-from app.lib.tests import assert_status_with_message, ViewTestMixin
+from app.lib.tests import assert_status_with_message, assert_status_with_flashmessage, ViewTestMixin
 from app.config.tests import settings, responses as tests_responses
 
 import pdb
@@ -33,6 +33,22 @@ class TestAccounts(ViewTestMixin):
 
         response = self.client.get(url_for('accounts.accountlist', domainid=2, accounttype='x-invalid_domaintype-x'))
         assert_status_with_message(302, response, self.responses['302'])
+
+        self.logout()
+
+        # as user
+        self.login(settings['TEST_2_USER_USER'], settings['TEST_2_PW_USER'])
+
+        response = self.client.get(url_for('accounts.accountlist', domainid=2, accounttype='local'))
+        assert_status_with_flashmessage(302, response, self.client, self.responses['POSTMASTER_REQUIRED'], 'error')
+
+        self.logout()
+
+        # as postmaster
+        self.login(settings['TEST_2_USER_POSTMASTER'], settings['TEST_2_PW_POSTMASTER'])
+
+        response = self.client.get(url_for('accounts.accountlist', domainid=2, accounttype='local'))
+        assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_LOCAL_OK'])
 
         self.logout()
 

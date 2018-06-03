@@ -7,7 +7,7 @@ from markupsafe import Markup
 from . import auth
 from .forms import LoginForm
 #from app.app import db, session_domain_id
-from ..models.models import User,  Domain
+from ..models.models import User
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,6 +57,7 @@ def login():
         # if a session_domain_id was assigned, we got a valid login
         if session_domain_id == None:
             flash('Invalid user or password.', 'error')
+            return redirect(url_for('auth.login'))
         elif user.is_active:
             flash(Markup('Login succeded for user <b>' + user.username + '</b>'),  'success')
             # redirect to the appropriate dashboard page after login
@@ -68,9 +69,11 @@ def login():
                 return redirect(url_for('home.user'))
         else: # if not user.is_active
             flash(Markup('User <i>' + str(user.username) + '</i> is disabled.'), 'warning')
-                
+            return redirect(url_for('auth.login'))
+
     # load login template
     return render_template('auth/login.html', domainname = request.host, form=form, title='Login')
+
 
 @auth.route('/logout')
 @login_required

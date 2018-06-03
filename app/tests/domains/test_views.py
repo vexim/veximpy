@@ -1,7 +1,7 @@
 # app/tests/domains/test_views.py
 
 from flask import url_for
-from app.lib.tests import assert_status_with_message, ViewTestMixin
+from app.lib.tests import assert_status_with_message, assert_status_with_flashmessage, ViewTestMixin
 from app.config.tests import settings, responses as tests_responses
 
 #import pdb
@@ -32,7 +32,23 @@ class TestDomains(ViewTestMixin):
         assert_status_with_message(200, response, self.responses['DOMAIN_LIST_LOCAL_OK'])
 
         response = self.client.get(url_for('domains.domainlist', domaintype='x-invalid_domaintype-x'))
-        assert_status_with_message(200, response, self.responses['DOMAIN_LIST_LOCAL_OK'])
+        assert_status_with_message(302, response, self.responses['302'])
+
+        self.logout()
+
+        # as user
+        self.login(settings['TEST_2_USER_USER'], settings['TEST_2_PW_USER'])
+
+        response = self.client.get(url_for('domains.domainlist', domaintype='local'))
+        assert_status_with_flashmessage(302, response, self.client, self.responses['SITEADMIN_REQUIRED'], 'error')
+
+        self.logout()
+
+        # as postmaster
+        self.login(settings['TEST_2_USER_POSTMASTER'], settings['TEST_2_PW_POSTMASTER'])
+
+        response = self.client.get(url_for('domains.domainlist', domaintype='local'))
+        assert_status_with_flashmessage(302, response, self.client, self.responses['SITEADMIN_REQUIRED'], 'error')
 
         self.logout()
 
@@ -63,7 +79,7 @@ class TestDomains(ViewTestMixin):
         assert_status_with_message(200, response, self.responses['DOMAIN_ADD_LOCAL_OK'])
 
         response = self.client.get(url_for('domains.domains_add', domaintype='x-invalid_domaintype-x'))
-        assert_status_with_message(200, response, self.responses['DOMAIN_ADD_LOCAL_OK'])
+        assert_status_with_message(302, response, self.responses['302'])
 
         self.logout()
 
