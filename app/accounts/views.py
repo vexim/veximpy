@@ -9,23 +9,29 @@ from markupsafe import Markup
 from .forms import AccountFormLocal, AccountFormAlias #, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
-from app.app import require_postmaster, db, session_domain_id
-from ..config.settings import settings, domaindefaults
+from app.app import db, session_domain_id
+from ..config.settings import settings, domaindefaults, accountlist_title
+from ..lib.decorators import accounttyp_required, postmaster_required, siteadmin_required
 
 #from ..back import back
-
-accountlist_title = {'local': 'Local', 'alias': 'Alias'} #, 'list': 'Mailinglist'}
 
 @accounts.route('/accountlist/<int:domainid>/<accounttype>/')
 @accounts.route('/accountlist/<int:domainid>/',  defaults={'accounttype': 'local'})
 @accounts.route('/accountlist/',  defaults={'domainid': 0, 'accounttype': 'local'})
 @login_required
+@postmaster_required
+@accounttyp_required
 def accountlist(domainid, accounttype):
     """
     Render the domainlist template on the / route
     """
 
-    require_postmaster(domainid)
+#    require_postmaster(domainid)
+
+#    if accounttype not in accountlist_title:
+#        flash(Markup('We don\'t know the accounttype <b>' + accounttype + '</b>.'), 'error')
+#        # redirect to domainlist page
+#        return redirect(url_for('accounts.accountlist', domainid=domainid, accounttype='local'))
 
     if accounttype == 'local':
         accounttype_list = ['local',  'piped']
@@ -51,6 +57,7 @@ def accountlist(domainid, accounttype):
 
 @accounts.route('/account_enabled/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_enabled/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
+@postmaster_required
 @login_required
 def account_enabled(accountid, accounttype):
     """
@@ -59,7 +66,7 @@ def account_enabled(accountid, accounttype):
 
     account = User.query.get_or_404(accountid)
     #domain = Domain.query.get_or_404(account.domain_id)
-    require_postmaster(account.domain_id)
+    #require_postmaster(account.domain_id)
 
     if account.enabled == 0 or account.user_id == 1:
        account.enabled = 1
@@ -77,13 +84,14 @@ def account_enabled(accountid, accounttype):
 
 @accounts.route('/account_add/<int:domainid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_add/<int:domainid>', defaults={'accounttype': 'local'}, methods=['GET', 'POST'])
+@postmaster_required
 @login_required
 def account_add(domainid, accounttype):
     """
     Render the homepage template on the / route
     """
 
-    require_postmaster(domainid)
+    #require_postmaster(domainid)
     add_account = True
 
     if accounttype not in accountlist_title:
@@ -162,6 +170,7 @@ def account_edit(accountid, accounttype):
 
 @accounts.route('/account_delete/<int:accountid>/<accounttype>')
 @accounts.route('/account_delete/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
+@postmaster_required
 @login_required
 def account_delete(accountid, accounttype):
     """
@@ -169,7 +178,7 @@ def account_delete(accountid, accounttype):
     """
 
     account = User.query.get_or_404(accountid)
-    require_postmaster(account.domain_id)
+    #require_postmaster(account.domain_id)
 
     username = account.username
     domainid = account.domain_id

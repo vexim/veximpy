@@ -133,6 +133,18 @@ siteadmindefaults = {
     'role': settings['ROLE_SITEADMIN'], 
 }
 
+domainlist_title = {
+    'local': 'Local',
+    'alias': 'Alias',
+    'relay': 'Relay',
+}
+
+accountlist_title = {
+    'local': 'Local',
+    'alias': 'Alias',
+#    'list': 'Mailinglist',
+}
+
 """
 end of configuration
 """

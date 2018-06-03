@@ -11,20 +11,20 @@ from .forms import DomainFormLocal, DomainFormAlias, DomainFormRelay, DomainForm
 from ..accounts.forms import AccountFormLocal
 from . import domains
 from ..models.models import Domain, Domainalia, User
-from ..app import require_siteadmin,  db
-from ..config.settings import domaindefaults, aliasdomaindefaults, postmasterdefaults
-
-domainlist_title = {'local': 'Local', 'alias': 'Alias', 'relay': 'Relay'}
+from ..app import db
+from ..config.settings import domaindefaults, aliasdomaindefaults, postmasterdefaults, domainlist_title
+from ..lib.decorators import domaintyp_required, siteadmin_required
 
 @domains.route('/domainlist/<domaintype>/')
 @domains.route('/domainlist/', defaults={'domaintype': 'local'})
+@siteadmin_required
 @login_required
 def domainlist(domaintype):
     """
     Render the homepage template on the /domains_alias route
     """
 
-    require_siteadmin()
+    #require_siteadmin()
 
     if domaintype not in domainlist_title:
         domaintype = 'local'
@@ -41,13 +41,14 @@ def domainlist(domaintype):
 
 @domains.route('/domains_enabled/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 @domains.route('/domains_enabled/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
+@siteadmin_required
 @login_required
 def domains_enabled(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
 
-    require_siteadmin()
+    #require_siteadmin()
 
     try:
         if domaintype == 'alias':
@@ -73,13 +74,14 @@ def domains_enabled(domainid, domaintype):
 
 @domains.route('/domains_add/<domaintype>', methods=['GET', 'POST'])
 @domains.route('/domains_add/',  defaults={'domaintype': 'local'}, methods=['GET', 'POST'])
+@siteadmin_required
 @login_required
 def domains_add(domaintype):
     """
     Render the homepage template on the / route
     """
 
-    require_siteadmin()
+    #require_siteadmin()
     add_domain = True
 
     if domaintype not in domainlist_title:
@@ -169,17 +171,14 @@ def domains_add(domaintype):
 @domains.route('/domains_edit/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 #@domains.route('/domains_edit/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
+@siteadmin_required
+@domaintyp_required
 def domains_edit(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
-    require_siteadmin()
+    #require_siteadmin()
     add_domain = False
-
-    # test if the domaintype is valid
-    if domaintype not in domainlist_title:
-        flash(Markup('We don\'t know the domaintype <b>' + domaintype + '</b>.'), 'error')
-        return redirect(url_for('domains.domainlist', _anchor=domainid, domaintype='local'))
 
     # create DB object for domain
     try:
@@ -234,13 +233,14 @@ def domains_edit(domainid, domaintype):
 
 @domains.route('/domains_delete/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 @domains.route('/domains_delete/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
+@siteadmin_required
 @login_required
 def domains_delete(domainid, domaintype):
     """
     Render the homepage template on the / route
     """
 
-    require_siteadmin()
+    #require_siteadmin()
 
     if domaintype == 'alias':
         domain = Domainalia.query.get_or_404(domainid)

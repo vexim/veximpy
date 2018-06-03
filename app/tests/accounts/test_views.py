@@ -4,7 +4,7 @@ from flask import url_for
 from app.lib.tests import assert_status_with_message, ViewTestMixin
 from app.config.tests import settings, responses as tests_responses
 
-#import pdb
+import pdb
 
 class TestAccounts(ViewTestMixin):
     responses = {
@@ -28,21 +28,22 @@ class TestAccounts(ViewTestMixin):
         response = self.client.get(url_for('accounts.accountlist', domainid=2))
         assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_LOCAL_OK'])
         
-        response = self.client.get(url_for('accounts.accountlist', domainid=2, domaintype='local'))
+        response = self.client.get(url_for('accounts.accountlist', domainid=2, accounttype='local'))
         assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_LOCAL_OK'])
 
-        response = self.client.get(url_for('accounts.accountlist', domainid=2, domaintype='x-invalid_domaintype-x'))
-        assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_LOCAL_OK'])
+        response = self.client.get(url_for('accounts.accountlist', domainid=2, accounttype='x-invalid_domaintype-x'))
+        assert_status_with_message(302, response, self.responses['302'])
 
         self.logout()
 
-#    def test_aliasaccountlist(self, db):
-#        self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])
-#
-#        response = self.client.get(url_for('accounts.accountlist', domainid=2,  domaintype='alias'))
-#        assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_ALIAS_OK'])
-#
-#        self.logout()
+    def test_aliasaccountlist(self, db):
+        self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])
+
+        response = self.client.get(url_for('accounts.accountlist', domainid=2,  accounttype='alias'))
+        #pdb.set_trace()
+        assert_status_with_message(200, response, self.responses['ACCOUNT_LIST_ALIAS_OK'])
+
+        self.logout()
 
 #    def test_listaccountlist(self, db):
 #        self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])

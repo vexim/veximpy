@@ -47,4 +47,4 @@ def postmaster():
     """
 
     #return render_template('home/postmaster.html', title="Postmaster")
-    return redirect(url_for('accounts.accountlist', domaintype='local'))
+    return redirect(url_for('accounts.accountlist', domainid=current_user.is_postmaster, domaintype='local'))
