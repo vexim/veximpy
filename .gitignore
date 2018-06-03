@@ -26,6 +26,8 @@ venv/
 *.bz
 *.tar.*
 instance/config.py
+doc/nginx/veximpy
+doc/uwsgi/veximpy.ini
 migrations/
 **/.pytest_cache/**
 

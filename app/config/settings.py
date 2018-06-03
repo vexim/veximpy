@@ -1,6 +1,5 @@
 # app/config/settings.py
 
-import copy
 import string
 
 # Some extra characters to be added to the allowed chars for passwords
@@ -25,6 +24,10 @@ settings = {
     # some defaultvalues for postmaster accounts
     'POSTMASTER_DELETEALLOW': 0,    # allow deletion of postmaster accounts
     'POSTMASTER_CHANGEUIDGID': 0,   # 
+    
+    'ROLE_SITEADMIN':   0b1000000000000000,   # int 32896
+    'ROLE_POSTMASTER':          0b10000000,   # int 128'
+    'ROLE_USER':                0b00000000,   # int 0'
 }
 
 """
@@ -64,22 +67,47 @@ domaindefaults = {
     'host_smtp': 'mail1',
     'host_imap': 'mail1',
     'host_pop': 'mail1',
-    'relayto': '',        # relay messages to this server (IP)
+    'relayto': '',              # relay messages to this server (IP)
     'pwd_charallowed': settings['PWDCHARSALLOWED'],
     'pwd_lengthmin': settings['PWDLENGTHMIN'],
     'pwd_rules': '255',
 }
 
+aliasdomaindefaults = {
+    'enabled': 1,               # enable domain
+    'host_smtp': 'mail1',
+    'host_imap': 'mail1',
+    'host_pop': 'mail1',
+}
+
+sitedomaindefaults = {
+    **domaindefaults,
+    'domain_id': 1,
+    'domain': "site",
+}
+
 accountdefaults = {
-    'quota': domaindefaults['quotas']
+    'admin': 0,
+    'quota': domaindefaults['quotas'],
+    'on_blocklist': 0,          # enable blocklist
+    'on_avscan': 1,             # enable antivirus scan
+    'on_spamassassin': 1,       # enable spamassassin
+    'spam_drop': 1,             # drop messages above sa_refuse score
+    'on_forward': 0,            # enable forwarding of messages
+    'forward': '',              # mailadresses to forward to
+    'unseen': 0,                # disable local storage of forwarded messages
+    'on_vacation': 0,           # enable vacation message
+    'vacation': '',             # text for vacation message
+    'role': settings['ROLE_USER'],
 }
 
 """
 some defaultvalues for postmaster accounts in users table
 the keys of this dictionary correspond to the fields in the DB
 """
-postmasterdefaults = copy.deepcopy(accountdefaults)
 postmasterdefaults = {
+    **accountdefaults,
+    'admin': 1,
     'quota': 100,               # quota of the account
     'maxmsgsize': 5000,         # max. message size per message
     'on_blocklist': 0,          # enable blocklist
@@ -88,12 +116,21 @@ postmasterdefaults = {
     'sa_tag': 5,                # tag messages above this score
     'sa_refuse': 10,            # refuse messages above this score
     'spam_drop': 1,             # drop messages above sa_refuse score
-    'on_forward': 0,            # enable forwarding of messages
     'forward': '',              # mailadresses to forward to
     'unseen': 0,                # disable local storage of forwarded messages
     'on_vacation': 0,           # enable vacation message
     'vacation': '',             # text for vacation message
-    'role': 0b10000000,         # set role to postmaster (128)
+    'role': settings['ROLE_POSTMASTER'], # set role to postmaster (128)
+}
+
+siteadmindefaults = {
+    **accountdefaults,
+    'user_id': 1,
+    'domain_id': 1, 
+    'localpart': "siteadmin", 
+    'username': "siteadmin", 
+    'admin': 1, 
+    'role': settings['ROLE_SITEADMIN'], 
 }
 
 """

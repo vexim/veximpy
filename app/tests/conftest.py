@@ -6,9 +6,10 @@ import pytest
 #from mock import Mock
 
 from instance import config
-#from app.config.settings import settings
+from app.config.settings import sitedomaindefaults, siteadmindefaults, postmasterdefaults, domaindefaults, accountdefaults
 from app.app import create_app
 from app.app import db as _db
+from app.lib.tests import settings as test_settings
 
 
 #import pdb
@@ -64,59 +65,29 @@ def db(app):
     # Create a single user because a lot of tests do not mutate this user.
     # It will result in faster tests.
     
-    domain_dict = {
-        'domain_id': 1,
-        'domain': 'site',
-        }
-    
-    domain = Domain(**domain_dict)
+    domain = Domain(**sitedomaindefaults)
     _db.session.add(domain)
-#    _db.session.commit()
 
-    account_dict = {
-        'domain_id': 1,
-        'role': 0b1000000010000000, 
-        'localpart': 'siteadmin', 
-        'username': 'siteadmin',
-        'admin': 1, 
-    }
-
-    siteadmin = User(**account_dict)
-    siteadmin.password_set('TEST-password_1657')
+    siteadmin = User(**siteadmindefaults)
+    siteadmin.password_set(test_settings['TEST_PW_SITEADMIN'])
     _db.session.add(siteadmin)
-#    _db.session.commit()
 
-    domain_dict = {
-        'domain_id': 2,
-        'domain': 'runout.at',
-        }
-    
-    domain = Domain(**domain_dict)
+    domain = Domain(**domaindefaults)
+    domain.domain_id = 2
     _db.session.add(domain)
-#    _db.session.commit()
 
-    account_dict = {
-        'domain_id': 2,
-        'role': 0b10000000,
-        'localpart': 'postmaster', 
-        'username': 'postmaster@runout.at',
-        'admin': 1, 
-    }
-
-    postmaster = User(**account_dict)
-    postmaster.password_set('TEST-password_1657')
+    postmaster = User(**postmasterdefaults)
+    postmaster.domain_id = 2
+    postmaster.localpart = 'postmaster'
+    postmaster.username = 'postmaster@runout.at'
+    postmaster.password_set(test_settings['TEST_PW_POSTMASTER'])
     _db.session.add(postmaster)
 
-    account_dict = {
-        'domain_id': 2,
-        'role': 0b00000000,
-        'localpart': 'user', 
-        'username': 'user@local.host',
-        'admin': 0, 
-    }
-
-    user = User(**account_dict)
-    user.password_set('TEST-password_1657')
+    user = User(**accountdefaults)
+    user.domain_id = 2
+    user.localpart = 'user1'
+    user.username = 'user1@runout.at'
+    user.password_set(test_settings['TEST_PW_USER'])
     _db.session.add(user)
 
     _db.session.commit()

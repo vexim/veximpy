@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.sql import label
 from app.models.models import Domain, User
 from app.app import db, create_app
+from app.config.settings import sitedomaindefaults, siteadmindefaults
 
 config_name = os.getenv('FLASK_CONFIG')
 app = create_app(config_name)
@@ -16,9 +17,7 @@ def create_siteadmin(self, siteadmin_password):
         if d[0].count != 0:
             print("Sitedomain already exists")
         else:
-            domain = Domain()
-            domain.domain_id = 1
-            domain.domain = "site"
+            domain = Domain(**sitedomaindefaults)
             db.session.add(domain)
             db.session.commit()
 
@@ -26,14 +25,8 @@ def create_siteadmin(self, siteadmin_password):
         if u[0].count != 0:
             print("Siteadmin user already exists")
         else:
-            user = User()
-            user.user_id = 1
-            user.domain_id = 1
-            user.localpart = "siteadmin"
-            user.username = "siteadmin"
+            user = User(**siteadmindefaults)
             user.password_set(siteadmin_password)
-            user.admin = 1
-            user.role = 0b1000000010000000
             db.session.add(user)
             db.session.commit()
 

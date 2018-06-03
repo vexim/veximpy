@@ -54,7 +54,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if current_user.is_postmaster and request.blueprint=='accounts' %}
+                {% if domainid and current_user.is_postmaster and request.blueprint=='accounts' %}
                     <div class="navbar-nav dropdown">
                         <a class="nav-item nav-link dropdown-toggle" href="#" id="navbarDropdownMenuAccounts" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           Accounts

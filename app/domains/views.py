@@ -11,7 +11,7 @@ from ..accounts.forms import AccountFormLocal
 from . import domains
 from ..models.models import Domain, Domainalia, User
 from ..app import require_siteadmin,  db
-from ..config.settings import domaindefaults
+from ..config.settings import domaindefaults, aliasdomaindefaults, postmasterdefaults
 
 domainlist_title = {'local': 'Local', 'alias': 'Alias', 'relay': 'Relay'}
 
@@ -34,7 +34,7 @@ def domainlist(domaintype):
         domainlist = Domain.query.filter(Domain.type == domaintype).order_by(Domain.domain)
 
     return render_template('domains/domainlist.html',
-        title="Domains", list_title=domainlist_title[domaintype] + " Domains",
+        title="Domains", list_title=domaintype + " Domains",
         domainlist=domainlist,
         domaintype=domaintype)
 
@@ -82,28 +82,25 @@ def domains_add(domaintype):
         domaintype = 'local'
 
     if domaintype == 'local':
-        form = DomainFormLocal(action='add')
+        form = DomainFormLocal(obj=Domain(**domaindefaults), action='add')
     elif domaintype == 'alias':
-        form = DomainFormAlias(action='add')
+        form = DomainFormAlias(obj=Domainalia(**aliasdomaindefaults), action='add')
         form.domain_id.choices = (Domain.query.with_entities(Domain.domain_id, Domain.domain).filter(Domain.domain_id>1)).filter(Domain.type == 'local').order_by(Domain.domain).all()
     elif domaintype == 'relay':
-        form = DomainFormRelay(action='add')
+        form = DomainFormRelay(obj=Domain(**domaindefaults), action='add')
     elif domaintype == 'list':
-        form = DomainFormMailinglist(action='add')
+        form = DomainFormMailinglist(obj=Domain(**domaindefaults), action='add')
 
-    if form and request.method == 'GET':
-        form.process(MultiDict(domaindefaults))
+
+#    if form and request.method == 'GET':
+#        form.process(MultiDict(domaindefaults))
 
     if form.submitcancel.data:
         return redirect(url_for('domains.domainlist', domaintype=domaintype))
 
     if request.method == 'POST':
         domainname = ''
-        if domaintype == 'local':
-            domainname = form.domain.data
-            domain = Domain()
-            account = User()
-        elif domaintype == 'alias':
+        if domaintype == 'alias':
             domainname = form.alias.data
             domain = Domainalia()
         else:
@@ -126,11 +123,13 @@ def domains_add(domaintype):
                 return render_template('domains/domain.html', action='Add',
                                     domainname = '', 
                                     add_domain=add_domain, form=form,
-                                    title='Add ' + domainlist_title[domaintype] + ' Domain')
+                                    title='Add ' + domaintype + ' Domain')
             
             if domaintype == 'local':
-                account = User()
-                form_account = AccountFormLocal(action='addPostmaster',  domain=domain)
+                # add postmaster account
+                account = User(**postmasterdefaults)
+                form_account = AccountFormLocal(obj=account, action='addPostmaster', domain=domain)
+                #form_account.process(MultiDict(postmasterdefaults))
                 form_account.password1.data = form.password1.data
                 form_account.password2.data = form.password2.data
                 if form_account.account_save(account):
@@ -143,13 +142,13 @@ def domains_add(domaintype):
                         return render_template('domains/domain.html', action='Add',
                                             domainname = '', 
                                             add_domain=add_domain, form=form,
-                                            title='Add ' + domainlist_title[domaintype] + ' Domain')
+                                            title='Add ' + domaintype + ' Domain')
                 else:
                     flash(Markup('An error occured on adding a postmaster account to domain <b>' + domainname + '</b> during form data validation.'), 'error')
                     return render_template('domains/domain.html', action='Add',
                                             domainname = '', 
                                             add_domain=add_domain, form=form,
-                                            title='Add ' + domainlist_title[domaintype] + ' Domain')
+                                            title='Add ' + domaintype + ' Domain')
             flash(Markup('You have successfully added the domain <b>' + domainname + '</b>'), 'success')
 
             # redirect to domainlist page
@@ -236,7 +235,7 @@ def domains_delete(domainid, domaintype):
 
     domainname = domain.domainname
 
-    if domain.enabled == 0 and domain.id>1 and (not domaintype == 'local' or (2>(domain.users.count() | int) and 0==(domain.aliases.count() | int))):
+    if domain.is_deleteable:
         db.session.delete(domain)
         db.session.commit()
         flash(Markup('You have successfully deleted the domain <b>' + domainname + '</b>.'), 'warning')

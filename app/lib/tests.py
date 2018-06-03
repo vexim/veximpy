@@ -2,6 +2,12 @@ import pytest
 from flask import url_for
 
 
+settings = {
+    'TEST_PW_SITEADMIN': 'TEST-password_1657-siteadmin',
+    'TEST_PW_POSTMASTER': 'TEST-password_1657-postmaster',
+    'TEST_PW_USER': 'TEST-password_1657-user',
+}
+
 def assert_status_with_message(status_code=200, response=None, message=None):
     """
     Check to see if a message is contained within a response.
