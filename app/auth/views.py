@@ -8,6 +8,7 @@ from . import auth
 from .forms import LoginForm
 #from app.app import db, session_domain_id
 from ..models.models import User
+from ..home.views import redirect_home
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,19 +58,11 @@ def login():
         # if a session_domain_id was assigned, we got a valid login
         if session_domain_id == None:
             flash('Invalid user or password.', 'error')
-            return redirect(url_for('auth.login'))
         elif user.is_active:
             flash(Markup('Login succeded for user <b>' + user.username + '</b>'),  'success')
-            # redirect to the appropriate dashboard page after login
-            if (user.is_siteadmin):
-                return redirect(url_for('domains.domainlist', domainname = user.domains.domain, domaintype='local'))
-            if (user.is_postmaster):
-                return redirect(url_for('accounts.accountlist', domainname = user.domains.domain, domainid=user.domain_id, accounttype='local'))
-            else:
-                return redirect(url_for('home.user'))
         else: # if not user.is_active
             flash(Markup('User <i>' + str(user.username) + '</i> is disabled.'), 'warning')
-            return redirect(url_for('auth.login'))
+        return redirect_home()
 
     # load login template
     return render_template('auth/login.html', domainname = request.host, form=form, title='Login')

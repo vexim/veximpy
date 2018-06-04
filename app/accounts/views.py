@@ -11,7 +11,7 @@ from . import accounts
 from ..models.models import Domain, User
 from app.app import db, session_domain_id
 from ..config.settings import settings, domaindefaults, accountlist_title
-from ..lib.decorators import accounttyp_required, postmaster_required
+from ..lib.decorators import accountid_check, accounttyp_required, domainid_check, postmaster_required, user_required
 
 #from ..back import back
 
@@ -19,6 +19,7 @@ from ..lib.decorators import accounttyp_required, postmaster_required
 @accounts.route('/accountlist/<int:domainid>/',  defaults={'accounttype': 'local'})
 @accounts.route('/accountlist/',  defaults={'domainid': 0, 'accounttype': 'local'})
 @login_required
+@domainid_check
 @postmaster_required
 @accounttyp_required
 def accountlist(domainid, accounttype):
@@ -50,6 +51,7 @@ def accountlist(domainid, accounttype):
 
 @accounts.route('/account_enabled/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_enabled/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
+@accountid_check
 @postmaster_required
 @login_required
 def account_enabled(accountid, accounttype):
@@ -132,7 +134,9 @@ def account_add(domainid, accounttype):
 
 @accounts.route('/account_edit/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_edit/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
+@user_required
 @login_required
+@accounttyp_required
 def account_edit(accountid, accounttype):
     """
     Render the homepage template on the / route

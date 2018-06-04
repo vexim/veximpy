@@ -13,12 +13,12 @@ from . import domains
 from ..models.models import Domain, Domainalia, User
 from ..app import db
 from ..config.settings import domaindefaults, aliasdomaindefaults, postmasterdefaults, domainlist_title
-from ..lib.decorators import domaintyp_required, siteadmin_required
+from ..lib.decorators import domainid_check, domaintyp_required, siteadmin_required
 
 @domains.route('/domainlist/<domaintype>/')
 @domains.route('/domainlist/', defaults={'domaintype': 'local'})
-@siteadmin_required
 @login_required
+@siteadmin_required
 @domaintyp_required
 def domainlist(domaintype):
     """
@@ -36,9 +36,10 @@ def domainlist(domaintype):
         domaintype=domaintype)
 
 @domains.route('/domains_enabled/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
-@domains.route('/domains_enabled/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
-@siteadmin_required
+@domains.route('/domains_enabled/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
+@domainid_check
+@siteadmin_required
 def domains_enabled(domainid, domaintype):
     """
     Render the homepage template on the / route
@@ -67,7 +68,7 @@ def domains_enabled(domainid, domaintype):
     return redirect(url_for('domains.domainlist', _anchor=domainid, domaintype=domaintype))
 
 @domains.route('/domains_add/<domaintype>', methods=['GET', 'POST'])
-@domains.route('/domains_add/',  defaults={'domaintype': 'local'}, methods=['GET', 'POST'])
+@domains.route('/domains_add/', defaults={'domaintype': 'local'}, methods=['GET', 'POST'])
 @siteadmin_required
 @login_required
 @domaintyp_required
@@ -160,8 +161,9 @@ def domains_add(domaintype):
                             title='Add ' + domaintype + ' domain')
 
 @domains.route('/domains_edit/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
-#@domains.route('/domains_edit/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
+#@domains.route('/domains_edit/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
+@domainid_check
 @siteadmin_required
 @domaintyp_required
 def domains_edit(domainid, domaintype):
@@ -223,9 +225,10 @@ def domains_edit(domainid, domaintype):
 
 
 @domains.route('/domains_delete/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
-@domains.route('/domains_delete/',  defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
-@siteadmin_required
+@domains.route('/domains_delete/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
+@siteadmin_required
+@domainid_check
 @domaintyp_required
 def domains_delete(domainid, domaintype):
     """
