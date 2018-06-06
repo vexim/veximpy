@@ -16,12 +16,8 @@ from config import app_config
 # db variable initialization
 db = SQLAlchemy()
 login_manager = LoginManager()
-session_domain_id = 0
-session_domainname = ''
 
 def create_app(config_name,  settings_override=None):
-
-    global session_domain_id
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
@@ -39,8 +35,6 @@ def create_app(config_name,  settings_override=None):
 
     #debug_toolbar = DebugToolbarExtension()
     #debug_toolbar.init_app(app)
-
-    session_domain_id = 0
 
     from app.models import models
 

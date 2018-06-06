@@ -1,3 +1,6 @@
+# app/models/models.py
+# This file is part of veximpy
+
 # coding: utf-8
 
 #import string 
@@ -83,12 +86,6 @@ class Domain(db.Model):
     pwd_lengthmin = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_lengthmin']))
     pwd_rules = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_rules']))
 
-    PWDRULES_LOWER      = 0b00000001
-    PWDRULES_UPPER      = 0b00000010
-    PWDRULES_DIGIT      = 0b00000100
-    PWDRULES_NONALPHA   = 0b00001000
-    
-
     users = db.relationship('User', primaryjoin='User.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains1', lazy='dynamic')
     localusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "local")', cascade="save-update, merge, delete", backref='domains2', lazy='dynamic')
     aliasusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "alias")', cascade="save-update, merge, delete", backref='domains3', lazy='dynamic')
@@ -112,6 +109,10 @@ class Domain(db.Model):
             if  self.aliases.count() == 0 and self.postmasters.count() == self.users.count():
                 return True
         return False
+
+    @property
+    def is_sitedomain(self):
+        return self.domain_id == 1
 
     def id2name(domainid):
         return Domain.query.filter_by(domain_id=domainid).one().domain
@@ -194,6 +195,10 @@ class User(db.Model, UserMixin):
         return(self.user_id)
 
     @property
+    def domainid(self):
+        return(self.domain_id)
+
+    @property
     def domainname(self):
         return(self.domains.domain)
 
@@ -207,7 +212,7 @@ class User(db.Model, UserMixin):
 
     @property
     def is_siteadmin(self):
-        return(self.role & settings['ROLE_SITEADMIN'] == settings['ROLE_SITEADMIN'])
+        return(self.role & settings['ROLE_SITEADMIN'] == settings['ROLE_SITEADMIN']) or self.domains.is_sitedomain
 
     # returns the domain_id if its a postmaster otherwise 0
     @property

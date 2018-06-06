@@ -1,4 +1,5 @@
 #!/bin/bash
+# This file is part of veximpy
 
 . activate
 if [[ ! -d "migrations" ]]; then

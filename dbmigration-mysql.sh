@@ -1,4 +1,5 @@
 #!/bin/bash
+# This file is part of veximpy
 # this script will migrate your existing vexim2 DB for use with veximpy
 # by Markus Gschwendt
 #

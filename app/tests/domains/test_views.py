@@ -1,4 +1,5 @@
 # app/tests/domains/test_views.py
+# This file is part of veximpy
 
 from flask import url_for
 from app.lib.tests import assert_status_with_message, assert_status_with_flashmessage, ViewTestMixin

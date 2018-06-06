@@ -1,4 +1,5 @@
 # app/config/tests.py
+# This file is part of veximpy
 
 settings = {
     'TEST_USER_SITEADMIN': 'siteadmin',
@@ -37,5 +38,5 @@ responses = {
     '302': '',
     '404': '> 404 Error <',
     'SITEADMIN_REQUIRED': 'The requested functionality is reserved for siteadmins',
-    'POSTMASTER_REQUIRED': 'The requested functionality is reserved for postmasters',
+    'POSTMASTER_REQUIRED': 'You have no permission for domain id <b>',
 }

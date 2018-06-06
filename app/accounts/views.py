@@ -1,15 +1,16 @@
 # app/accounts/views.py
+# This file is part of veximpy
 
 #import sys
 #from sqlalchemy.sql import or_, and_, tuple_
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from werkzeug import MultiDict
 from markupsafe import Markup
 from .forms import AccountFormLocal, AccountFormAlias #, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
-from app.app import db, session_domain_id
+from app.app import db
 from ..config.settings import settings, domaindefaults, accountlist_title
 from ..lib.decorators import accountid_check, accounttyp_required, domainid_check, postmaster_required, user_required
 
@@ -31,11 +32,6 @@ def accountlist(domainid, accounttype):
         accounttype_list = ['local',  'piped']
     else:
         accounttype_list = [accounttype]
-
-    if domainid < 1:
-        domainid = session_domain_id
-        if session_domain_id < 1:
-            abort(404)
 
     domain = Domain.query.get_or_404(domainid)
 

@@ -1,4 +1,5 @@
 # app/tests/auth/test_views.py
+# This file is part of veximpy
 
 from app.lib.tests import assert_status_with_message, ViewTestMixin
 from app.config.tests import settings, responses as tests_responses

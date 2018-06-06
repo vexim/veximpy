@@ -1,4 +1,5 @@
 #!/bin/bash
+# This file is part of veximpy
 
 sudo apt install python3 python3-venv python3-pip
 python3 -m venv venv

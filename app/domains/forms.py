@@ -1,4 +1,5 @@
 # app/domains/forms.py
+# This file is part of veximpy
 
 from os import path
 from flask_wtf import FlaskForm

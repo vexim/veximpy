@@ -1,4 +1,5 @@
 # config.py
+# This file is part of veximpy
 
 import os
 

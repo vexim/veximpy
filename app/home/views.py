@@ -1,4 +1,5 @@
 # app/home/views.py
+# This file is part of veximpy
 
 from flask import redirect, url_for
 from flask_login import current_user, login_required

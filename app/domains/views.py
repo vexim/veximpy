@@ -1,4 +1,5 @@
 # app/domains/views.py
+# This file is part of veximpy
 
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -54,7 +55,7 @@ def domains_enabled(domainid, domaintype):
         flash(Markup('We couldn\'t find the domainid <b>' + domainid + '</b>.'), 'error')
         return redirect(url_for('domains.domainlist', domaintype='local'))
 
-    if domain.enabled == 0 or domain.domain_id == 1:
+    if domain.is_sitedomain or domain.enabled == 0:
        domain.enabled = 1
        enabledtxt = 'enabled'
        flashtype = 'success'

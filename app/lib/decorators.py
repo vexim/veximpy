@@ -10,7 +10,6 @@ from functools import wraps
 from ..config.settings import settings, accountlist_title, domainlist_title
 from ..home.views import redirect_home
 
-
 def siteadmin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -30,10 +29,7 @@ def postmaster_required(f):
         if not (current_user.is_postmaster == domainid
                 or (current_user.is_siteadmin)
                     and settings['SITEADMIN_ALLOWMANAGEACCOUNTS'] == 1):
-            if domainid == 0:
-                flash(Markup('You have no permission for domainid <b>' + str(domainid) + '</b>.'), 'error')
-            else:
-                flash(Markup('The requested functionality is reserved for postmasters.'+ str(domainid)), 'error')
+            flash(Markup('You have no permission for domain id <b>' + str(domainid) + '</b>.'), 'error')
             return redirect_home()
 
         return f(*args, **kwargs)
@@ -49,7 +45,7 @@ def user_required(f):
                 or current_user.is_postmaster == _get_domainid(kwargs)
                 or (current_user.is_siteadmin)
                     and settings['SITEADMIN_ALLOWMANAGEACCOUNTS'] == 1):
-            flash(Markup('You are not the owner of account <b>' + str(accountid) + '</b>.'), 'error')
+            flash(Markup('You have no permission for account id <b>' + str(accountid) + '</b>.'), 'error')
             return redirect_home()
 
         return f(*args, **kwargs)
@@ -78,7 +74,7 @@ def domainid_check(f):
             flash(Markup('No domainid given.'), 'error')
             return redirect_home()
         elif _get_domainid(kwargs) == 0:
-            flash(Markup('Invalid domainid <b>' + str(kwargs['domainid']) + '</b>.'), 'error')
+            flash(Markup('Invalid domain id <b>' + str(kwargs['domainid']) + '</b>.'), 'error')
             return redirect_home()
 
         return f(*args, **kwargs)
@@ -89,7 +85,7 @@ def accounttyp_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if kwargs['accounttype'] not in accountlist_title:
-            flash(Markup('We don\'t know the accounttype <b>' + kwargs['accounttype'] + '</b>.'), 'error')
+            flash(Markup('We don\'t know the account type <b>' + kwargs['accounttype'] + '</b>.'), 'error')
             return redirect_home()
 
         return f(*args, **kwargs)
@@ -101,7 +97,7 @@ def domaintyp_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if kwargs['domaintype'] not in domainlist_title:
-            flash(Markup('We don\'t know the domaintype <b>' + kwargs['domaintype'] + '</b>.'), 'error')
+            flash(Markup('We don\'t know the domain type <b>' + kwargs['domaintype'] + '</b>.'), 'error')
             return redirect_home()
 
         return f(*args, **kwargs)
@@ -113,8 +109,11 @@ def domaintyp_required(f):
 
 def _get_domainid(kwargs_dict):
     if 'domainid' in kwargs_dict:
-        from ..models.models import Domain
+        if kwargs_dict['domainid'] <= 0:
+            kwargs_dict['domainid'] = current_user.domain_id
+            return kwargs_dict['domainid']
         try:
+            from ..models.models import Domain
             return Domain.query.filter_by(domain_id=kwargs_dict['domainid']).one().id
         except NoResultFound:
             return 0
@@ -122,13 +121,15 @@ def _get_domainid(kwargs_dict):
     if accountid > 0:
         from ..models.models import User
         return User.query.filter_by(user_id=accountid).one().domain_id
-    else:
-        return 0
+    return 0
 
 def _get_accountid(kwargs_dict):
     if 'accountid' in kwargs_dict:
-        from ..models.models import User
+        if kwargs_dict['accountid'] <= 0:
+            kwargs_dict['accountid'] = current_user.domain_id
+            return kwargs_dict['accountid']
         try:
+            from ..models.models import User
             return User.query.filter_by(user_id=kwargs_dict['accountid']).one().id
         except NoResultFound:
             return  0

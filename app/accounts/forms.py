@@ -1,4 +1,5 @@
 # app/accounts/forms.py
+# This file is part of veximpy
 
 from os import path
 from flask_wtf import FlaskForm
@@ -20,7 +21,7 @@ class AccountFormLocal(FlaskForm):
     domain = Domain()
     pwdcharallowed = settings['PWDCHARSALLOWED']
     pwdlengthmin = settings['PWDLENGTHMIN']
-    role = 0b00000000
+    role = settings['ROLE_USER']
 
     def __init__(self, label='', validators=None, obj=None, action='add', domain=None, *args, **kwargs):
         self.action = action.lower()

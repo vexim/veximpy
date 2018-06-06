@@ -1,4 +1,6 @@
 # instance/config.py
+# This file is part of veximpy
+
 # instance/config.py.default contains a template
 # copy this template to instance/config.py and modify the latter
 

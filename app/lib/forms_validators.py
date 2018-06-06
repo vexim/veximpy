@@ -8,7 +8,7 @@ Functions:
 import dns.resolver
 import validators
 from wtforms import ValidationError
-from ..config.settings import settings
+from ..config.settings import settings, domaindefaults
 from ..models.models import Domain, Domainalia, User
 
 
@@ -18,6 +18,9 @@ def PasswordRules(form, field):
     Password length
     Allowed characters
     """
+    val_msg = []
+    val_fail = False
+
     if field.data is None:
         return
 
@@ -27,17 +30,24 @@ def PasswordRules(form, field):
     elif len(field.data) < form.pwdlengthmin:
         raise ValidationError('Password too short. Minimum length is 10 characters.')
 
-    if not any(_.islower() for _ in field.data):
-        raise ValidationError('Password must contain lower case characters, upper case characters, digits and special characters. Allowed characters: ' + form.pwdcharallowed)
+    if (domaindefaults['pwd_rules'] & settings['PWDRULES_LOWER']):
+        val_msg.append('lower case')
+        val_fail = val_fail | (not any(_.islower() for _ in field.data))
 
-    if not any(_.isupper() for _ in field.data):
-        raise ValidationError('Password must contain lower case characters, upper case characters, digits and special characters. Allowed characters: ' + form.pwdcharallowed)
+    if (domaindefaults['pwd_rules'] & settings['PWDRULES_UPPER']):
+        val_msg.append('upper case')
+        val_fail = val_fail | (not any(_.isupper() for _ in field.data))
 
-    if not any(_.isdigit() for _ in field.data):
-        raise ValidationError('Password must contain lower case characters, upper case characters, digits and special characters. Allowed characters: ' + form.pwdcharallowed)
+    if (domaindefaults['pwd_rules'] & settings['PWDRULES_DIGIT']):
+        val_msg.append('digits')
+        val_fail = val_fail | (not any(_.isdigit() for _ in field.data))
 
-    if not any((not _.isalnum() or _ in settings['PWDCHARSLIG']) for _ in field.data):
-        raise ValidationError('Password must contain lower case characters, upper case characters, digits and special characters. Allowed characters: ' + form.pwdcharallowed)
+    if (domaindefaults['pwd_rules'] & settings['PWDRULES_NONALPHA']):
+        val_msg.append('special characters')
+        val_fail = val_fail | (not any((not _.isalnum() or _ in settings['PWDCHARSLIG']) for _ in field.data))
+
+    if val_fail:
+        raise ValidationError('Password must contain characters of all of following groups: ' + ', '.join(val_msg) + '.')
 
     if any(not (_ in (form.pwdcharallowed)) for _ in field.data):
         raise ValidationError('Password contains illegal characters. Allowed characters: ' + form.pwdcharallowed)
@@ -138,7 +148,7 @@ def LocalpartExists(form, field):
     if 0 != User.query.filter(User.domain_id==form.domain_id.data).filter(User.localpart==field.data).count():
         raise ValidationError('Account exists')
 
-def QuotaDomains(form,  field):
+def QuotaDomains(form, field):
     """
     Check if quotas is <= quotasmax for a domain
     in table users

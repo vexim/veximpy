@@ -1,4 +1,5 @@
 # app/models/siteadminadd.py
+# This file is part of veximpy
 
 import sys, os
 from sqlalchemy import func
@@ -13,7 +14,7 @@ app = create_app(config_name)
 # create siteadmin user and domain
 def create_siteadmin(self, siteadmin_password):
     with app.app_context():
-        d = db.session.query(label('count', func.count(Domain.domain_id))).filter(Domain.domain_id == 1).all()
+        d = db.session.query(label('count', func.count(Domain.domain_id))).filter(Domain.is_sitedomain).one()
         if d[0].count != 0:
             print("Sitedomain already exists")
         else:

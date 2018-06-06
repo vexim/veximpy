@@ -1,4 +1,5 @@
 # app/config/settings.py
+# This file is part of veximpy
 
 import string
 
@@ -20,6 +21,10 @@ settings = {
     'PWDCHARSLIG': pwdchars_lig,
     'PWDCHARSALLOWED': string.ascii_letters + string.digits + '!§%&/()=?,.-;:_ <>|\{[]}@#+*~^°' + pwdchars_lig,
     'PWD_CRYPT_METHOD': 'pbkdf2_sha512',    # algorythmus for password hashing (module passlib.hash)
+    'PWDRULES_LOWER':       0b00000001,
+    'PWDRULES_UPPER':       0b00000010,
+    'PWDRULES_DIGIT':       0b00000100,
+    'PWDRULES_NONALPHA':    0b00001000,
 
     # some defaultvalues for postmaster accounts
     'POSTMASTER_DELETEALLOW': 0,    # allow deletion of postmaster accounts
@@ -72,7 +77,10 @@ domaindefaults = {
     'relayto': '',              # relay messages to this server (IP)
     'pwd_charallowed': settings['PWDCHARSALLOWED'],
     'pwd_lengthmin': settings['PWDLENGTHMIN'],
-    'pwd_rules': '255',
+    'pwd_rules': settings['PWDRULES_LOWER'] # defines which groups of characters must be containd in a password
+        | settings['PWDRULES_UPPER']
+        | settings['PWDRULES_DIGIT']
+        | settings['PWDRULES_NONALPHA'],
 }
 
 aliasdomaindefaults = {

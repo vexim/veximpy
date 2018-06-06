@@ -1,4 +1,5 @@
 #!/bin/bash
+# This file is part of veximpy
 
 if [[ -d "$(dirname ${0})migrations" ]]; then
     echo "Directory 'migrations' exists. If you really want to install a new DB remove it: \`rm -r migrations\`"

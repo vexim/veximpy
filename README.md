@@ -100,6 +100,8 @@ echo "mysql user: "; read USER; echo "mysql passwd: "; stty -echo; read PW; stty
 ```
 
 # License
+For a copy of the License see the file COPYING.
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or

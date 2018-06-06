@@ -1,3 +1,6 @@
+# app/tests/conftest.py
+# This file is part of veximpy
+
 #import datetime
 #import json
 
