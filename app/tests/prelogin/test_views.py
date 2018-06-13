@@ -3,7 +3,7 @@
 from flask import url_for
 from app.lib.tests import assert_status_with_message, ViewTestMixin
 
-import pdb
+#import pdb
 
 class TestPreLogin(ViewTestMixin):
     def test_rootpage(self, db):
@@ -11,7 +11,6 @@ class TestPreLogin(ViewTestMixin):
         #pdb.set_trace()
         #assert response.status_code == 200
         assert_status_with_message(200, response, '/login')
-        print(response)
 
     def test_loginpage(self, db):
         response = self.client.get(url_for('auth.login'))

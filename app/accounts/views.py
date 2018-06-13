@@ -1,7 +1,7 @@
 # app/accounts/views.py
 # This file is part of veximpy
 
-#import sys
+import logging
 #from sqlalchemy.sql import or_, and_, tuple_
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
@@ -165,6 +165,7 @@ def account_edit(accountid, accounttype):
     if request.method == 'POST':
         if form.account_save(account):
             try:
+                logging.debug(account.__dict__)
                 db.session.commit()
                 flash(Markup('You have successfully edited the domain <b>' + accountname + '</b>'), 'success')
                 # redirect to accountlist page

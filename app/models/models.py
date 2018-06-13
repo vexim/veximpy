@@ -105,7 +105,6 @@ class Domain(db.Model):
     def is_deleteable(self):
         if self.enabled == 0 and self.id>1:
             if not self.type == 'local':
-                print('local')
                 return True
             if  self.aliases.count() == 0 and self.postmasters.count() == self.users.count():
                 return True

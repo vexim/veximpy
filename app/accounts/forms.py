@@ -32,8 +32,6 @@ class AccountFormLocal(FlaskForm):
             raise ValueError('No domain object in AccountFormLocal.__init__')
 
         super().__init__(obj=obj)
-        print('init-realname: ' + self.realname.data)
-        print(obj.__dict__)
         self.pwdcharallowed = self.domain.pwd_charallowed
         self.pwdlengthmin = self.domain.pwd_lengthmin
 
@@ -62,6 +60,7 @@ class AccountFormLocal(FlaskForm):
             del self.uid
             del self.gid
         if self.localpart.data == 'postmaster':
+            del self.username
             del self.enabled
             del self.admin
         if self.domain.pipe != 1:
@@ -73,27 +72,32 @@ class AccountFormLocal(FlaskForm):
             self.password1.flags.required = True
         if self.password1.data == '':
             del self.password1
-            #self.password1.validators = []
             del self.password2
+
         if self.validate_on_submit():
             self.populate_obj(account)
             account.domain_id = self.domain.domain_id
-            if self.username.data == '':
+            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.role = self.role
+            account.type = 'local'
+
+            if self.username and self.username.data == '':
                 account.username = self.localpart.data + '@' + self.domain.domain
             if self.password1 and self.password1.data != '':
                 account.password_set(self.password1.data)
-            account.type = 'local'
             if settings['POSTMASTER_CHANGEUIDGID'] != 1:
                 account.uid = self.domain.uid
                 account.gid = self.domain.gid
-            if self.localpart.data == 'postmaster':
+            if self.localpart.object_data == 'postmaster':
+                account.username = 'postmaster@' + self.domain.domain
                 account.enabled = 1
                 account.admin = 1
+                account.role = account.role | settings['ROLE_POSTMASTER']
+                print(account.role)
             if self.domain.pipe != 1:
                 account.on_pipe = 0
                 account.smtp = path.join(self.domain.maildir, self.localpart.data, 'Maildir')
-            account.pop = path.join(self.domain.maildir, self.localpart.data)
-            account.role = self.role
+
             return True
         return False
 

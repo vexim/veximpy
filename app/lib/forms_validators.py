@@ -64,7 +64,6 @@ def IPList(form, field):
     Check IPv4 and IPv6 syntax
     """
     invalidip = ''
-    logging.debug(field.data)
     if field.data:
         for _ in field.data.split(';'):
             if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())):
@@ -102,7 +101,6 @@ def Username(form, field):
     Check if this username is already in username
     
     """
-    logging.debug(form.localpart.object_data)
     if field.data is None or field.data == form.localpart.object_data + '@' + form.domain.domain:
         return
     if '@' in field.data:
