@@ -2,6 +2,10 @@
 # This file is part of veximpy
 
 settings = {
+    'TEST_DOMAIN': 'runout.at', 
+    'TEST_PWD-VALID': 'vAlId-_123456789',
+    'TEST_PWD-INVALID': 'invalidpassword',
+
     'TEST_USER_SITEADMIN': 'siteadmin',
     'TEST_PW_SITEADMIN': 'TEST-password_1657-siteadmin',
     'TEST_DOMAINTYPE_SITEADMIN': 'local',

@@ -5,13 +5,13 @@
 #from sqlalchemy.sql import or_, and_, tuple_
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
-from werkzeug import MultiDict
+from sqlalchemy.orm.exc import NoResultFound
 from markupsafe import Markup
 from .forms import AccountFormLocal, AccountFormAlias #, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
 from app.app import db
-from ..config.settings import settings, domaindefaults, accountlist_title
+from ..config.settings import settings, accountlist_title
 from ..lib.decorators import accountid_check, accounttyp_required, domainid_check, postmaster_required, user_required
 
 #from ..back import back
@@ -55,8 +55,11 @@ def account_enabled(accountid, accounttype):
     Render the homepage template on the / route
     """
 
-    account = User.query.get_or_404(accountid)
-    #domain = Domain.query.get_or_404(account.domain_id)
+    try:
+        account = User.query.filter(User.user_id == accountid).one()
+    except NoResultFound:
+        flash(Markup('We couldn\'t find the accountid <b>' + str(accountid) + '</b>.'), 'error')
+        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, accounttype=accounttype))
 
     if account.enabled == 0 or account.user_id == 1:
        account.enabled = 1
@@ -84,19 +87,23 @@ def account_add(domainid, accounttype):
 
     add_account = True
 
-    domain = Domain.query.get_or_404(domainid)
-    account = User()
+    try:
+        domain = Domain.query.filter(Domain.domain_id == domainid).one()
+    except NoResultFound:
+        flash(Markup('We couldn\'t find the domainid <b>' + str(domainid) + '</b>.'), 'error')
+
+    account = User(**domain.get_accountdefaults_dict())
 
     if accounttype == 'local':
-        form = AccountFormLocal(action='add', domain=domain)
+        form = AccountFormLocal(obj=account, action='add', domain=domain)
     elif accounttype == 'alias':
         form = AccountFormAlias(action='add', domain=domain)
 #    elif accounttype == 'list':
 #        form = AccountFormMailinglist(action='add', domain=domain)
 
-    if request.method == 'GET':
-        form.process(MultiDict(domaindefaults))
-        accountname = form.username.data
+    #if request.method == 'GET':
+        #form.process(MultiDict(domaindefaults))
+    accountname = form.username.data
 
     if request.method == 'POST':
         if form.account_save(account):
@@ -121,6 +128,7 @@ def account_add(domainid, accounttype):
                                     domainid=domainid,
                                     title='Add ' + accounttype + ' account')
         flash(Markup('You have successfully added the account <b>' + accountname + '</b>'), 'success')
+        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, accounttype=accounttype))
     return render_template('accounts/account.html', action='Add',
                             add_account=add_account, form=form,
                             accountname=accountname,

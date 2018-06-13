@@ -2,6 +2,7 @@
 # This file is part of veximpy
 
 import os
+import logging
 
 from dotenv import load_dotenv
 
@@ -29,6 +30,7 @@ class DevelopmentConfig(Config):
     #SQLALCHEMY_ECHO = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SERVER_NAME = 'veximpy.runout.at'
+    logging.basicConfig(level=logging.DEBUG)
 
 
 class ProductionConfig(Config):
@@ -37,7 +39,7 @@ class ProductionConfig(Config):
     """
 
     DEBUG = False
-
+    logging.basicConfig(level=logging.WARNING)
 
 class TestsConfig(Config):
     """
@@ -46,6 +48,7 @@ class TestsConfig(Config):
     """
 
     DEBUG = 1
+    logging.basicConfig(level=logging.DEBUG)
     TESTING = True
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = True

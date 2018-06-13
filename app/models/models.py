@@ -11,7 +11,7 @@
 #from flask_sqlalchemy import SQLAlchemy
 from app.app import db, login_manager
 #from instance.config import VEXIMDB_SCHEMA
-from ..config.settings import groupdefaults, domaindefaults,  accountdefaults, settings
+from ..config.settings import groupdefaults, domaindefaults, accountdefaults, postmasterdefaults, settings
 from flask_login import UserMixin
 from passlib.context import CryptContext
 from passlib.hash import pbkdf2_sha256, pbkdf2_sha512
@@ -120,8 +120,33 @@ class Domain(db.Model):
     def name2id(domainname):
         return Domain.query.filter_by(domain=domainname).one().id
 
-    def __repr__(self):
-        return '{}'.format(self.domain)
+    def get_accountdefaults_dict(self):
+        _defaults = {
+            **accountdefaults, 
+            'domain_id': self.id,
+            'enabled': domaindefaults['enabled'],
+            'uid': self.uid,
+            'gid': self.gid,
+            'smtp': self.maildir,
+            'quota': self.quotas,
+            'maxmsgsize': self.maxmsgsize,
+            'on_avscan': self.avscan,
+            'on_spamassassin': self.spamassassin,
+            'sa_tag': self.sa_tag,
+            'sa_refuse': self.sa_refuse,
+        }
+        return _defaults
+
+    def get_postmasterdefaults_dict(self):
+        _defaults = {
+            **self.get_accountdefaults_dict(),
+            **postmasterdefaults,
+            'username': 'postmaster@' + self.domain,
+        }
+        return _defaults
+
+        def __repr__(self):
+            return '{}'.format(self.domain)
 
 t_group_contents = db.Table(
     'group_contents',

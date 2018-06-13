@@ -4,6 +4,7 @@
 from flask import url_for
 from app.lib.tests import assert_status_with_message, assert_status_with_flashmessage, ViewTestMixin
 from app.config.tests import settings, responses as tests_responses
+from app.config.settings import domaindefaults
 
 #import pdb
 
@@ -17,6 +18,7 @@ class TestDomains(ViewTestMixin):
         'DOMAIN_ADD_LOCAL_OK': '>Add local domain</h1>',
         'DOMAIN_ADD_ALIAS_OK': '>Add alias domain</h1>',
         'DOMAIN_ADD_RELAY_OK': '>Add relay domain</h1>',
+        'DOMAIN_ADD_LOCAL_POST_OK': 'You have successfully added the domain',
         'DOMAIN_EDIT_SUBMITBUTTON_OK': 'submitedit',
         'DOMAIN_EDIT_LOCAL_OK': '>Edit local domain <b>',
         'DOMAIN_EDIT_ALIAS_OK': '>Edit alias domain <b>',
@@ -69,7 +71,7 @@ class TestDomains(ViewTestMixin):
 
         self.logout()
 
-    def test_localdomainadd(self, db):
+    def test_localdomainadd_get(self, db):
         self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])
 
         response = self.client.get(url_for('domains.domains_add'))
@@ -83,6 +85,29 @@ class TestDomains(ViewTestMixin):
         assert_status_with_message(302, response, self.responses['302'])
 
         self.logout()
+
+#    def test_localdomainadd_post(self, db):
+#        self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])
+#
+#        mimetype = 'text/html'
+#        headers = {
+#            'Content-Type': mimetype,
+#            'Accept': mimetype,
+#        }
+#        data = {
+#            **domaindefaults,
+#            'domain': '10.' + settings['TEST_DOMAIN'],
+#            'password1': settings['TEST_PWD-VALID'],
+#            'password2': settings['TEST_PWD-VALID'],
+#        }
+#
+#        response = self.client.post(url_for('domains.domains_add', domaintype='local'), data=data, headers=headers)
+#
+#        assert response.content_type == mimetype
+#        assert_status_with_message(200, response, self.responses['DOMAIN_ADD_LOCAL_POST_OK'])
+#        #assert response.json['Result'] == 39
+#
+#        self.logout()
 
     def test_aliasdomainadd(self, db):
         self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])

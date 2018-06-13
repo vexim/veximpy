@@ -13,7 +13,7 @@ settings = {
     # right now the RFC is stupid - https://tools.ietf.org/html/rfc6530#section-7.1 - it allowes a lot more characters
     # this is default but add what you think your yousers need. eg: !#$%&'*+-/=?^_`{|}~;
     # eMail addresses are _not_ case sensitive. even some $$$-companies believe the oposite.
-    'USERNAMES_CHARSALLOWED': string.ascii_lowercase + string.digits + "!#$%&*+-/=?^_{|}~.",
+    'USERNAMES_CHARSALLOWED': string.ascii_lowercase + string.digits + "@!#$%&*+-/=?^_{|}~.",
 
     # default settings for passwords
     # PWDLENGTHMIN is a default _and_ a minimum value
@@ -64,7 +64,7 @@ domaindefaults = {
     'blocklists': 0,            # enable blocklists; per user
     'enabled': 1,               # enable domain
     'mailinglists': 0,          #
-    'maxmsgsize': 5000,         # kB, max. size per message; per user
+    'maxmsgsize': 6000,         # kB, max. size per message; per user
     'pipe': 0,                  # allow pipe to command for users
     'spamassassin': 1,          # enable spamassassin; per user
     'sa_tag': 3,                # tag msg above this score; per user
@@ -97,18 +97,23 @@ sitedomaindefaults = {
 }
 
 accountdefaults = {
+    'realname': '',
+    'localpart': '',
+    'username': '',
+    'comment': '',
     'admin': 0,
-    'quota': domaindefaults['quotas'],
+    'quota': 1000, 
     'on_blocklist': 0,          # enable blocklist
-    'on_avscan': 1,             # enable antivirus scan
-    'on_spamassassin': 1,       # enable spamassassin
+    'enabled': domaindefaults['enabled'],
     'spam_drop': 1,             # drop messages above sa_refuse score
+    'on_piped': 0,
     'on_forward': 0,            # enable forwarding of messages
     'forward': '',              # mailadresses to forward to
     'unseen': 0,                # disable local storage of forwarded messages
     'on_vacation': 0,           # enable vacation message
     'vacation': '',             # text for vacation message
     'role': settings['ROLE_USER'],
+    'maxmsgsize': 1, 
 }
 
 """
@@ -117,6 +122,8 @@ the keys of this dictionary correspond to the fields in the DB
 """
 postmasterdefaults = {
     **accountdefaults,
+    'realname': 'Postmaster',
+    'localpart': 'postmaster',
     'admin': 1,
     'quota': 100,               # quota of the account
     'maxmsgsize': 5000,         # max. message size per message
@@ -137,8 +144,8 @@ siteadmindefaults = {
     **accountdefaults,
     'user_id': 1,
     'domain_id': 1, 
-    'localpart': "siteadmin", 
-    'username': "siteadmin", 
+    'localpart': "siteadmin",
+    'username': "siteadmin",
     'admin': 1, 
     'role': settings['ROLE_SITEADMIN'], 
 }

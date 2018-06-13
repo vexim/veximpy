@@ -30,18 +30,31 @@ class AccountFormLocal(FlaskForm):
         else:
             raise ValueError('No domain object in AccountFormLocal.__init__')
 
-        super().__init__()
+        super().__init__(obj=obj)
+        print('init-realname: ' + self.realname.data)
+        print(obj.__dict__)
         self.pwdcharallowed = self.domain.pwd_charallowed
         self.pwdlengthmin = self.domain.pwd_lengthmin
 
+        if self.domain.quotas == 0:
+            _quotamin = 0
+            _quotamax = 2147483647
+        else:
+            _quotamin = 10
+            _quotamax = self.domain.quotas
+        self.quota.validators=[NumberRange(min=_quotamin, max=_quotamax)]
+        self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
+
         if self.action == 'add':
-            if not obj:
-                self.set_defaults_from_domain()
+            #if not obj:
+            #    self.set_defaults_from_domain()
             del self.submitedit
             self.domain_id = self.domain.domain_id
         elif self.action == 'addpostmaster':
-            self.set_defaults_from_domain()
-            self.set_defaults_for_postmaster()
+            #if not obj:
+            #    self.set_defaults_from_domain()
+            #    self.set_defaults_for_postmaster()
+            del self.password2
             self.role = postmasterdefaults['role']
         elif self.action == 'edit':
             del self.submitadd
@@ -58,9 +71,10 @@ class AccountFormLocal(FlaskForm):
             del self.smtp
 
     def account_save(self, account):
-        if self.action == 'add':
+        if self.action in ['add', 'addpostmaster']:
             self.password1.flags.required = True
         if self.validate_on_submit():
+            print('valid')
             self.populate_obj(account)
             account.domain_id = self.domain.domain_id
             if self.username.data == '':
@@ -79,78 +93,79 @@ class AccountFormLocal(FlaskForm):
             account.pop = path.join(self.domain.maildir, self.localpart.data)
             account.role = self.role
             return True
+        print(account)
+        print('not valid')
         return False
 
-    def set_defaults_from_domain(self):
-        if self.domain.quotas == 0:
-            _quotamin = 0
-            _quotamax = 2147483647
-        else:
-            _quotamin = 10
-            _quotamax = self.domain.quotas
-        self.enabled.data=bool_checked(domaindefaults['enabled'])
-        self.realname.data=''
-        self.localpart.data=''
-        self.username.data=''
-        self.comment.data=''
-        self.uid.data=self.domain.uid
-        self.gid.data=self.domain.gid
-        self.admin.data=bool_checked()
-        self.on_pipe.data=bool_checked()
-        self.smtp.data=self.domain.maildir
-        self.quota.data=self.domain.quotas
-        self.quota.validators=[NumberRange(min=_quotamin, max=_quotamax)]
-        self.maxmsgsize.data=5000
-        self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
-        self.on_blocklist.data=bool_checked()
-        self.on_avscan.data=bool_checked(self.domain.avscan)
-        self.on_spamassassin.data=bool_checked(self.domain.spamassassin)
-        self.sa_tag.data=self.domain.sa_tag
-        self.sa_refuse.data=self.domain.sa_refuse
-        self.spam_drop.data=bool_checked()
-        self.on_forward.data=bool_checked()
-        self.forward.data=''
-        self.unseen.data=bool_checked()
-        self.on_vacation.data=bool_checked()
-        self.vacation.data=''
+#    def set_defaults_from_domain(self):
+#        if self.domain.quotas == 0:
+#            _quotamin = 0
+#            _quotamax = 2147483647
+#        else:
+#            _quotamin = 10
+#            _quotamax = self.domain.quotas
+#        self.enabled.data=bool_checked(domaindefaults['enabled'])
+#        self.realname.data=''
+#        self.localpart.data=''
+#        self.username.data=''
+#        self.comment.data=''
+#        self.uid.data=self.domain.uid
+#        self.gid.data=self.domain.gid
+#        self.admin.data=bool_checked()
+#        self.on_pipe.data=bool_checked()
+#        self.smtp.data=self.domain.maildir
+#        self.quota.data=self.domain.quotas
+#        self.quota.validators=[NumberRange(min=_quotamin, max=_quotamax)]
+#        self.maxmsgsize.data=4000
+#        self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
+#        self.on_blocklist.data=bool_checked()
+#        self.on_avscan.data=bool_checked(self.domain.avscan)
+#        self.on_spamassassin.data=bool_checked(self.domain.spamassassin)
+#        self.sa_tag.data=self.domain.sa_tag
+#        self.sa_refuse.data=self.domain.sa_refuse
+#        self.spam_drop.data=bool_checked()
+#        self.on_forward.data=bool_checked()
+#        self.forward.data=''
+#        self.unseen.data=bool_checked()
+#        self.on_vacation.data=bool_checked()
+#        self.vacation.data=''
 
-    def set_defaults_for_postmaster(self):
-        self.localpart.data = 'postmaster'
-        self.username.data = 'postmaster@' + self.domain.domain
-        self.realname.data = 'Postmaster'
-        self.uid.data = self.domain.uid
-        self.gid.data = self.domain.gid
-        self.admin.data =1
-        self.on_pipe.data = 0
-        self.smtp.data = path.join(self.domain.maildir, 'postmaster', 'Maildir')
-        self.quota.data = postmasterdefaults['quota']
-        self.maxmsgsize.data = postmasterdefaults['maxmsgsize']
-        self.on_blocklist.data = postmasterdefaults['on_blocklist']
-        self.on_avscan.data = postmasterdefaults['on_avscan']
-        self.on_spamassassin.data = postmasterdefaults['on_spamassassin']
-        self.sa_tag.data = postmasterdefaults['sa_tag']
-        self.sa_refuse.data = postmasterdefaults['sa_refuse']
-        self.spam_drop.data = postmasterdefaults['spam_drop']
-        self.on_forward.data = postmasterdefaults['on_forward']
-        self.forward.data = postmasterdefaults['forward']
-        self.unseen.data = postmasterdefaults['unseen']
-        self.on_vacation.data = postmasterdefaults['on_vacation']
-        self.vacation.data = postmasterdefaults['vacation']
-        self.admin.data = 1
+
+#    def set_defaults_for_postmaster(self):
+#        self.localpart.data = 'postmaster'
+#        self.username.data = 'postmaster@' + self.domain.domain
+#        self.realname.data = 'Postmaster'
+#        self.uid.data = self.domain.uid
+#        self.gid.data = self.domain.gid
+#        self.admin.data =1
+#        self.on_pipe.data = 0
+#        self.smtp.data = path.join(self.domain.maildir, 'postmaster', 'Maildir')
+#        self.quota.data = postmasterdefaults['quota']
+#        self.maxmsgsize.data = postmasterdefaults['maxmsgsize']
+#        self.on_blocklist.data = postmasterdefaults['on_blocklist']
+#        self.on_avscan.data = postmasterdefaults['on_avscan']
+#        self.on_spamassassin.data = postmasterdefaults['on_spamassassin']
+#        self.sa_tag.data = postmasterdefaults['sa_tag']
+#        self.sa_refuse.data = postmasterdefaults['sa_refuse']
+#        self.spam_drop.data = postmasterdefaults['spam_drop']
+#        self.on_forward.data = postmasterdefaults['on_forward']
+#        self.forward.data = postmasterdefaults['forward']
+#        self.unseen.data = postmasterdefaults['unseen']
+#        self.on_vacation.data = postmasterdefaults['on_vacation']
+#        self.vacation.data = postmasterdefaults['vacation']
 
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
-    realname = StringField('Realname',
-                    description='', validators=[Length(min=1, max=255)])
+    realname = StringField('Realname', description='', validators=[Length(min=1, max=255)])
     localpart = StringField('Localpart',
                     description='', validators=[Localpart, Length(min=1, max=255)])
     username = StringField('Username',
                     description='An arbitrary value. If empty the mailaddress of this account will be used.',
                     validators=[Username, Optional(), Length(min=0, max=255)])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
-    password1 = PasswordField('Password', validators=[PasswordRules, EqualTo('password2',
+    password1 = PasswordField('Password', validators=[PasswordRules])
+    password2 = PasswordField('Confirm Password', validators=[EqualTo('password1',
                     message='Password does not match confirmation password.')])
-    password2 = PasswordField('Confirm Password')
     uid = IntegerField('System UID', validators=[NumberRange(min=99, max=65535)])
     gid = IntegerField('System GID', validators=[NumberRange(min=99, max=65535)])
     admin = BooleanField('Domain Admin', false_values={0, False, 'false', ''})

@@ -18,6 +18,16 @@ DUMPFILE="${1}"
 DB_ORIGIN="${2}"
 DB_TARGET="${3}"
 
+# BASE_DIR should be one level above this script
+BASE_DIR="$(realpath $(dirname ${0})/..)"
+
+DBREINIT_SH="${BASE_DIR}/setup/dbreinit.sh"
+
+if [[ ! -f "${DBREINIT_SH}" ]]; then
+    echo "${DBREINIT_SH} does not exist"
+fi
+
+
 if [ ! -f "${DUMPFILE}" ]; then
     echo "file ${DUMPFILE} does not exist"
     exit
@@ -73,13 +83,10 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # call the script which handles `flask db {init|migrate|upgrade}´
-if [[ -f "$(dirname ${0})/dbreinit.sh" ]]; then
-    . $(dirname ${0})/activate
-    . $(dirname ${0})/dbreinit.sh ${DB_TARGET}
-    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 128 WHERE admin=1 OR localpart='postmaster'"
-    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 32896 WHERE user_id=1 OR username='siteadmin'"
-    mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "ALTER TABLE ${DB_TARGET}.domainalias CHANGE COLUMN domainalias_id domainalias_id INT(11) NOT NULL AUTO_INCREMENT , DROP PRIMARY KEY, ADD PRIMARY KEY (domainalias_id)"
-else
-    echo "$(dirname ${0})/dbreinit.sh does not exist"
-fi
+cd ${BASE_DIR}
+. activate
+. ${DBREINIT_SH} ${DB_TARGET}
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 128 WHERE admin=1 OR localpart='postmaster'"
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 32896 WHERE user_id=1 OR username='siteadmin'"
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "ALTER TABLE ${DB_TARGET}.domainalias CHANGE COLUMN domainalias_id domainalias_id INT(11) NOT NULL AUTO_INCREMENT , DROP PRIMARY KEY, ADD PRIMARY KEY (domainalias_id)"
 

@@ -1,8 +1,10 @@
 # app/domains/views.py
 # This file is part of veximpy
 
+import logging
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from flask_wtf.csrf import generate_csrf
 from sqlalchemy.orm.exc import NoResultFound
 #from wtforms.validators import DataRequired
 #from wtforms_alchemy import model_form_factory
@@ -13,7 +15,7 @@ from ..accounts.forms import AccountFormLocal
 from . import domains
 from ..models.models import Domain, Domainalia, User
 from ..app import db
-from ..config.settings import domaindefaults, aliasdomaindefaults, postmasterdefaults, domainlist_title
+from ..config.settings import domaindefaults, aliasdomaindefaults, domainlist_title
 from ..lib.decorators import domainid_check, domaintyp_required, siteadmin_required
 
 @domains.route('/domainlist/<domaintype>/')
@@ -48,11 +50,11 @@ def domains_enabled(domainid, domaintype):
 
     try:
         if domaintype == 'alias':
-            domain = Domainalia.query.one(domainid)
+            domain = Domainalia.query.filter(Domainalia.domainalias_id == domainid).one()
         else:
-            domain = Domain.query.one(domainid)
+            domain = Domain.query.filter(Domain.domain_id == domainid).one()
     except NoResultFound:
-        flash(Markup('We couldn\'t find the domainid <b>' + domainid + '</b>.'), 'error')
+        flash(Markup('We couldn\'t find the domainid <b>' + str(domainid) + '</b>.'), 'error')
         return redirect(url_for('domains.domainlist', domaintype='local'))
 
     if domain.is_sitedomain or domain.enabled == 0:
@@ -82,13 +84,17 @@ def domains_add(domaintype):
 
     if domaintype == 'local':
         form = DomainFormLocal(obj=Domain(**domaindefaults), action='add')
+        #form.process(**domaindefaults)
     elif domaintype == 'alias':
         form = DomainFormAlias(obj=Domainalia(**aliasdomaindefaults), action='add')
         form.domain_id.choices = (Domain.query.with_entities(Domain.domain_id, Domain.domain).filter(Domain.domain_id>1)).filter(Domain.type == 'local').order_by(Domain.domain).all()
+        #form.process(**aliasdomaindefaults)
     elif domaintype == 'relay':
         form = DomainFormRelay(obj=Domain(**domaindefaults), action='add')
+        #form.process(**domaindefaults)
     elif domaintype == 'list':
         form = DomainFormMailinglist(obj=Domain(**domaindefaults), action='add')
+        #form.process(**domaindefaults)
 
 
 #    if form and request.method == 'GET':
@@ -126,11 +132,12 @@ def domains_add(domaintype):
             
             if domaintype == 'local':
                 # add postmaster account
-                account = User(**postmasterdefaults)
+                account = User(**domain.get_postmasterdefaults_dict())
                 form_account = AccountFormLocal(obj=account, action='addPostmaster', domain=domain)
-                #form_account.process(MultiDict(postmasterdefaults))
-                form_account.password1.data = form.password1.data
-                form_account.password2.data = form.password2.data
+                print(account.__dict__)
+                form_account.process(**{**domain.get_postmasterdefaults_dict(), 'password1': form.password1.data, 'csrf_token': generate_csrf()})
+                #form_account.password1.data = form.password1.data
+                #form_account.password2.data = form.password2.data
                 if form_account.account_save(account):
                     try:
                         db.session.add(account)
@@ -143,11 +150,24 @@ def domains_add(domaintype):
                                             add_domain=add_domain, form=form,
                                             title='Add ' + domaintype + ' Domain')
                 else:
+                    logging.debug(form_account.errors)
                     flash(Markup('An error occured on adding a postmaster account to domain <b>' + domainname + '</b> during form data validation.'), 'error')
                     return render_template('domains/domain.html', action='Add',
                                             domainname = '', 
                                             add_domain=add_domain, form=form,
                                             title='Add ' + domaintype + ' Domain')
+
+#                    return render_template('accounts/account.html', action='Add',
+#                                    accountname = '', 
+#                                    add_account=True, form=AccountFormLocal(obj=account, action='add', domain=domain),
+#                                    domainname=domain.domain,
+#                                    domainid=domain.id, 
+#                                    title='Add ' + 'local' + ' account')
+
+
+
+
+
             flash(Markup('You have successfully added the domain <b>' + domainname + '</b>'), 'success')
 
             # redirect to domainlist page

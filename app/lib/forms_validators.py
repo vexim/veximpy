@@ -5,6 +5,7 @@ Functions:
 """
 
 #import string
+import logging
 import dns.resolver
 import validators
 from wtforms import ValidationError
@@ -26,8 +27,10 @@ def PasswordRules(form, field):
 
     if hasattr(form, 'pwd_lengthmin'):
         if len(field.data) < form.pwd_lengthmin.data:
+            logging.debug('Function PasswordRules. Password too short')
             raise ValidationError('Password too short. Minimum length is 10 characters.')
     elif len(field.data) < form.pwdlengthmin:
+        logging.debug('Function PasswordRules. Password too short')
         raise ValidationError('Password too short. Minimum length is 10 characters.')
 
     if (domaindefaults['pwd_rules'] & settings['PWDRULES_LOWER']):
@@ -47,9 +50,11 @@ def PasswordRules(form, field):
         val_fail = val_fail | (not any((not _.isalnum() or _ in settings['PWDCHARSLIG']) for _ in field.data))
 
     if val_fail:
+        logging.debug('Function PasswordRules. Missing char group')
         raise ValidationError('Password must contain characters of all of following groups: ' + ', '.join(val_msg) + '.')
 
     if any(not (_ in (form.pwdcharallowed)) for _ in field.data):
+        logging.debug('Function PasswordRules. illegal characters')
         raise ValidationError('Password contains illegal characters. Allowed characters: ' + form.pwdcharallowed)
 
 def IPList(form, field):
@@ -59,11 +64,13 @@ def IPList(form, field):
     Check IPv4 and IPv6 syntax
     """
     invalidip = ''
+    logging.debug(field.data)
     if field.data:
-        for _ in field.data[0].split(';'):
+        for _ in field.data.split(';'):
             if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())):
                 invalidip += _.strip() + ', '
     if invalidip != '':
+        logging.debug('Function IPList. Invalid IP address')
         raise ValidationError('Invalid IP address: ' + invalidip[:-2])
 
 def URI(form, field):
@@ -74,16 +81,19 @@ def URI(form, field):
     if field.data is None:
         return
     if (not validators.domain(field.data.strip())) or ('_' in field.data):
+        logging.debug('Function URI. Invalid domain name')
         raise ValidationError('Invalid domain name.')
     else:
         try:
             dns.resolver.query(field.data, 'MX')
         except dns.resolver.NXDOMAIN:
+            logging.debug('Function URI. No DNS MX record found')
             raise ValidationError('No DNS MX record found.')
         except:
-            raise ValidationError('DNS error')
+            logging.debug('Function URI. DNS error')
+            raise ValidationError('DNS error.')
 
-def Username(form,  field):
+def Username(form, field):
     """
     Check if the given value is a valid username
     It can be an arbitrary string or the localpart@domain from this account
@@ -96,18 +106,21 @@ def Username(form,  field):
     if field.data is None or field.data == form.localpart.data + '@' + form.domain.domain:
         return
     if '@' in field.data:
+        logging.debug('Function Username. Username can not be an eMail address except...')
         raise ValidationError('Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain)
 
     Localpart(form,  field)
 
     if field.data in ('postmaster', 'siteadmin'):
+        logging.debug('Function Username. Username not allowed')
         raise ValidationError('Username ' + field.data + ' is not allowed.')
     UsernameExists(form,  field)
 
-def Localpart(form,  field):
+def Localpart(form, field):
 #    import re
     
     if any(not _ in settings['USERNAMES_CHARSALLOWED'] for _ in field.data):
+        logging.debug('Function Localpart. illegal characters')
         raise ValidationError('Localpart contains illegal characters.')
 
 #    if settings('CHECK_RCPT_REMOTE_LOCALPARTS'):
@@ -126,7 +139,8 @@ def DomainExists(form, field):
     cnt = Domainalia.query.filter(Domainalia.alias==field.data).count()
     cnt += Domain.query.filter(Domain.domain==field.data).count()
     if cnt > 0:
-        raise ValidationError('Domainname exists')
+        logging.debug('Function DomainExists. Domainname exists')
+        raise ValidationError('Domainname exists.')
 
 def UsernameExists(form, field):
     """
@@ -136,7 +150,8 @@ def UsernameExists(form, field):
     if field.data is None:
         return
     if 0 != User.query.filter(User.username==field.data).count():
-        raise ValidationError('Account exists')
+        logging.debug('Function UsernameExists. Account exists')
+        raise ValidationError('Account exists.')
 
 def LocalpartExists(form, field):
     """
@@ -146,7 +161,8 @@ def LocalpartExists(form, field):
     if field.data is None:
         return
     if 0 != User.query.filter(User.domain_id==form.domain_id.data).filter(User.localpart==field.data).count():
-        raise ValidationError('Account exists')
+        logging.debug('Function LocalpartExists. Localpart exists')
+        raise ValidationError('Account (Localpart) exists.')
 
 def QuotaDomains(form, field):
     """
@@ -154,5 +170,6 @@ def QuotaDomains(form, field):
     in table users
     """
     if form.quotasmax.data > 0 and form.quotas.data > form.quotasmax.data:
-        raise ValidationError('Quotas > Max. Quotas')
+        logging.debug('Function QuotaDomains. Quotas > Max. Quotas')
+        raise ValidationError('Quotas > Max. Quotas.')
     return
