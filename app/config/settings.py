@@ -53,6 +53,7 @@ some of these settings in the domain table are defaults or min/max values for us
 the keys of this dictionary correspond to the fields in the DB
 """
 domaindefaults = {
+    'comment': '',
     'maildir': '/var/vmail',    # path for maildirs. domainname will be appended to this
     'uid': 99,                  # system uid
     'gid': 99,                  # system gid

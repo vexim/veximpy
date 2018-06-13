@@ -79,7 +79,7 @@
               
               {% for account in accountlist %}
                 <tr title="{{ account.comment }}">
-                  <td> <a id="{{ account.user_id }}" class="anchor-top"></a>{{ account.realname }} </td>
+                  <td title="{{ account.comment }}"> <a id="{{ account.user_id }}" class="anchor-top"></a>{{ account.realname }}</td>
                   <td> {{ account.username }} </td>
                   <td> {{ account.localpart }} </td>
                   

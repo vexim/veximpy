@@ -61,6 +61,7 @@ class Domain(db.Model):
 
     domain_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, unique=True, server_default='', index=True)
+    comment = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     maildir = db.Column(db.String(4096, 'utf8mb4_unicode_ci'), nullable=False, server_default=domaindefaults['maildir'])
     uid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['uid']))
     gid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['gid']))
@@ -182,6 +183,7 @@ class User(db.Model, UserMixin):
 
     user_id = db.Column(db.Integer, primary_key=True)
     domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    comment = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     localpart = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, index=True, server_default='')
     username = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default='')
     clear = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
@@ -210,7 +212,6 @@ class User(db.Model, UserMixin):
     sa_refuse = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['sa_refuse']))
     tagline = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     vacation = db.Column(db.Text(collation='utf8mb4_unicode_ci'))
-    comment = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     role = db.Column(db.Integer, nullable=False, server_default='0')
 
     domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')

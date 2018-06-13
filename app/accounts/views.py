@@ -148,13 +148,38 @@ def account_edit(accountid, accounttype):
 
     add_account = False
 
-    account = User.query.get_or_404(accountid)
-    domain = Domain.query.get_or_404(account.domain_id)
+    try:
+        account = User.query.filter_by(user_id=accountid).one()
+        domain = Domain.query.filter_by(domain_id=account.domain_id).one()
 
-    if accounttype == 'local':
-        form = AccountFormLocal(obj=account, action='edit',  domain=domain)
+        if accounttype == 'local':
+            form = AccountFormLocal(obj=account, action='edit',  domain=domain)
+            accountname = account.username
+    except NoResultFound:
+        flash(Markup('We couldn\'t find the accountid <b>' + str(accountid) + '</b>.'), 'error')
+        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype='local'))
 
-    accountname = account.username
+    if form.submitcancel.data:
+        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype=accounttype))
+
+    if request.method == 'POST':
+        if form.account_save(account):
+            try:
+                db.session.commit()
+                flash(Markup('You have successfully edited the domain <b>' + accountname + '</b>'), 'success')
+                # redirect to accountlist page
+                return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype=accounttype))
+            except:
+                db.session.rollback()
+                flash(Markup('<b>' + accountname + '</b> name already exists.'), 'error')
+                return render_template('domains/domain.html', action='Edit',
+                                accountname = accountname, 
+                                add_account=add_account, form=form,
+                                title='Edit ' + accounttype + 'account')
+        else:
+            # populate form with readonly data again
+            form.localpart.data = account.localpart
+            flash(Markup('An error occured on editing account <b>' + accountname + '</b> during form data validation.'), 'error')
 
     return render_template('accounts/account.html', action='Edit',
                             add_account=add_account, form=form,

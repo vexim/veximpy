@@ -79,7 +79,7 @@
               
               {% for domain in domainlist %}
                 <tr{% if not domain.enabled %} class="disabled"{% endif %}>
-                  <td> <a id="{{ domain.domain_id }}" class="anchor-top"></a>{{ domain.domainname }} </td>
+                  <td title="{{ domain.comment }}"> <a id="{{ domain.domain_id }}" class="anchor-top""></a>{{ domain.domainname }}</td>
                   {% if domaintype=='alias' %}
                     <td>{{ domain.domain.domain }}</td>
                   {% endif %}

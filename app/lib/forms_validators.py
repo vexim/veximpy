@@ -102,8 +102,8 @@ def Username(form, field):
     Check if this username is already in username
     
     """
-
-    if field.data is None or field.data == form.localpart.data + '@' + form.domain.domain:
+    logging.debug(form.localpart.object_data)
+    if field.data is None or field.data == form.localpart.object_data + '@' + form.domain.domain:
         return
     if '@' in field.data:
         logging.debug('Function Username. Username can not be an eMail address except...')

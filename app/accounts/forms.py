@@ -5,6 +5,7 @@ from os import path
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, IntegerField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import EqualTo, Length, NumberRange, Optional
+from wtforms_components import read_only
 from ..lib.forms_fields import TextAreaSepListField
 from ..lib.forms_functions import bool_checked
 from ..lib.forms_validators import Localpart, Username, PasswordRules
@@ -46,19 +47,16 @@ class AccountFormLocal(FlaskForm):
         self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
 
         if self.action == 'add':
-            #if not obj:
-            #    self.set_defaults_from_domain()
             del self.submitedit
             self.domain_id = self.domain.domain_id
         elif self.action == 'addpostmaster':
-            #if not obj:
-            #    self.set_defaults_from_domain()
-            #    self.set_defaults_for_postmaster()
             del self.password2
             self.role = postmasterdefaults['role']
         elif self.action == 'edit':
             del self.submitadd
-            #form.password1.flags.required = False
+            self.password1.flags.required = False
+            read_only(self.localpart)
+            self.localpart.validators = []
 
         if settings['POSTMASTER_CHANGEUIDGID'] != 1:
             del self.uid
@@ -73,13 +71,16 @@ class AccountFormLocal(FlaskForm):
     def account_save(self, account):
         if self.action in ['add', 'addpostmaster']:
             self.password1.flags.required = True
+        if self.password1.data == '':
+            del self.password1
+            #self.password1.validators = []
+            del self.password2
         if self.validate_on_submit():
-            print('valid')
             self.populate_obj(account)
             account.domain_id = self.domain.domain_id
             if self.username.data == '':
                 account.username = self.localpart.data + '@' + self.domain.domain
-            if self.password1.data != '':
+            if self.password1 and self.password1.data != '':
                 account.password_set(self.password1.data)
             account.type = 'local'
             if settings['POSTMASTER_CHANGEUIDGID'] != 1:
@@ -87,73 +88,14 @@ class AccountFormLocal(FlaskForm):
                 account.gid = self.domain.gid
             if self.localpart.data == 'postmaster':
                 account.enabled = 1
+                account.admin = 1
             if self.domain.pipe != 1:
                 account.on_pipe = 0
                 account.smtp = path.join(self.domain.maildir, self.localpart.data, 'Maildir')
             account.pop = path.join(self.domain.maildir, self.localpart.data)
             account.role = self.role
             return True
-        print(account)
-        print('not valid')
         return False
-
-#    def set_defaults_from_domain(self):
-#        if self.domain.quotas == 0:
-#            _quotamin = 0
-#            _quotamax = 2147483647
-#        else:
-#            _quotamin = 10
-#            _quotamax = self.domain.quotas
-#        self.enabled.data=bool_checked(domaindefaults['enabled'])
-#        self.realname.data=''
-#        self.localpart.data=''
-#        self.username.data=''
-#        self.comment.data=''
-#        self.uid.data=self.domain.uid
-#        self.gid.data=self.domain.gid
-#        self.admin.data=bool_checked()
-#        self.on_pipe.data=bool_checked()
-#        self.smtp.data=self.domain.maildir
-#        self.quota.data=self.domain.quotas
-#        self.quota.validators=[NumberRange(min=_quotamin, max=_quotamax)]
-#        self.maxmsgsize.data=4000
-#        self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
-#        self.on_blocklist.data=bool_checked()
-#        self.on_avscan.data=bool_checked(self.domain.avscan)
-#        self.on_spamassassin.data=bool_checked(self.domain.spamassassin)
-#        self.sa_tag.data=self.domain.sa_tag
-#        self.sa_refuse.data=self.domain.sa_refuse
-#        self.spam_drop.data=bool_checked()
-#        self.on_forward.data=bool_checked()
-#        self.forward.data=''
-#        self.unseen.data=bool_checked()
-#        self.on_vacation.data=bool_checked()
-#        self.vacation.data=''
-
-
-#    def set_defaults_for_postmaster(self):
-#        self.localpart.data = 'postmaster'
-#        self.username.data = 'postmaster@' + self.domain.domain
-#        self.realname.data = 'Postmaster'
-#        self.uid.data = self.domain.uid
-#        self.gid.data = self.domain.gid
-#        self.admin.data =1
-#        self.on_pipe.data = 0
-#        self.smtp.data = path.join(self.domain.maildir, 'postmaster', 'Maildir')
-#        self.quota.data = postmasterdefaults['quota']
-#        self.maxmsgsize.data = postmasterdefaults['maxmsgsize']
-#        self.on_blocklist.data = postmasterdefaults['on_blocklist']
-#        self.on_avscan.data = postmasterdefaults['on_avscan']
-#        self.on_spamassassin.data = postmasterdefaults['on_spamassassin']
-#        self.sa_tag.data = postmasterdefaults['sa_tag']
-#        self.sa_refuse.data = postmasterdefaults['sa_refuse']
-#        self.spam_drop.data = postmasterdefaults['spam_drop']
-#        self.on_forward.data = postmasterdefaults['on_forward']
-#        self.forward.data = postmasterdefaults['forward']
-#        self.unseen.data = postmasterdefaults['unseen']
-#        self.on_vacation.data = postmasterdefaults['on_vacation']
-#        self.vacation.data = postmasterdefaults['vacation']
-
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
     realname = StringField('Realname', description='', validators=[Length(min=1, max=255)])
@@ -207,7 +149,7 @@ class AccountFormLocal(FlaskForm):
     vacation = TextAreaField('Vacation message', validators=[Length(min=0, max=255)])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
-    cancel = SubmitField('Cancel')
+    submitcancel = SubmitField('Cancel')
 
 
 class AccountFormAlias(FlaskForm):
@@ -239,13 +181,13 @@ class AccountFormFail(FlaskForm):
     comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
-    cancel = SubmitField('Cancel')
+    submitcancel = SubmitField('Cancel')
 
 
 class AccountFormMailinglist(FlaskForm):
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
-    cancel = SubmitField('Cancel')
+    submitcancel = SubmitField('Cancel')
 
 
 class AccountFormCatchall(FlaskForm):
@@ -253,4 +195,4 @@ class AccountFormCatchall(FlaskForm):
     smtp = TextAreaSepListField('Address', description='', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
-    cancel = SubmitField('Cancel')
+    submitcancel = SubmitField('Cancel')

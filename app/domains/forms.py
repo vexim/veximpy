@@ -60,6 +60,7 @@ class DomainFormLocal(FlaskForm):
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
     domain = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
+    comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     maildir = StringField('Maildir base path. Domain name will be appended.', description='You can <b>not</b> change this later.', validators=[Length(min=3, max=4096)])
     password1 = PasswordField('Password for postmaster account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')

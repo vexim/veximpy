@@ -89,4 +89,5 @@ cd ${BASE_DIR}
 mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 128 WHERE admin=1 OR localpart='postmaster'"
 mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET role = 32896 WHERE user_id=1 OR username='siteadmin'"
 mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "ALTER TABLE ${DB_TARGET}.domainalias CHANGE COLUMN domainalias_id domainalias_id INT(11) NOT NULL AUTO_INCREMENT , DROP PRIMARY KEY, ADD PRIMARY KEY (domainalias_id)"
-
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.domains SET comment='' WHERE comment=NULL"
+mysql -v -u ${DB_USER} -p${DB_PW} -h ${DB_HOST} -P ${DB_PORT} -e "UPDATE ${DB_TARGET}.users SET comment='' WHERE comment=NULL"
