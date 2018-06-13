@@ -76,6 +76,55 @@ class TestValidators(ViewTestMixin):
         form = FormTextAreaSepListField(**{'x': '127.0.0.1 ; 2001::1'})
         assert IPList(form, form.x) == None
 
+    def test_validatorsURI(self):
+        form = FormTextAreaSepListField(**{'x': 'invalid?domain=.name'})
+        with pytest.raises(Exception) as excceptioninfo:
+            URI(form, form.x)
+        assert str(excceptioninfo.value) == 'Invalid domain name.'
+
+        form = FormTextAreaSepListField(**{'x': '000.example.com'})
+        with pytest.raises(Exception) as excceptioninfo:
+            URI(form, form.x)
+        assert str(excceptioninfo.value) == 'No DNS MX record found.'
+
+        form = FormTextAreaSepListField(**{'x': 'runout.at'})
+        assert URI(form, form.x) == None
+
+    def test_validatorsUsername(self):
+        form = FormString(**{'x': 'test@localpart', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        with pytest.raises(Exception) as excceptioninfo:
+            Username(form, form.x)
+        assert str(excceptioninfo.value) == 'Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain
+
+        form = FormString(**{'x': 'test@example.com', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        with pytest.raises(Exception) as excceptioninfo:
+            Username(form, form.x)
+        assert str(excceptioninfo.value) == 'Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain
+
+        form = FormString(**{'x': 'siteadmin', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        with pytest.raises(Exception) as excceptioninfo:
+            Username(form, form.x)
+        assert str(excceptioninfo.value) == 'Username ' + form.x.data + ' is not allowed.'
+
+        form = FormString(**{'x': 'testusername', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        assert Username(form, form.x) == None
+
+        form = FormString(**{'x': 'testlocalpart@example.com', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        assert Username(form, form.x) == None
+
+    def test_validatorsLocalpart(self):
+        form = FormString(**{'x': 'invalid " localpart'})
+        with pytest.raises(Exception) as excceptioninfo:
+            Localpart(form, form.x)
+        assert str(excceptioninfo.value) == 'Localpart contains illegal characters.'
+
+        form = FormString(**{'x': 'validlocalpart'})
+        assert Localpart(form, form.x) == None
 
     def test_validatorsDomainExists(self):
         form = FormString(**{'x': '02.example.com'})

@@ -109,7 +109,7 @@ def Username(form, field):
         logging.debug('Function Username. Username can not be an eMail address except...')
         raise ValidationError('Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain)
 
-    Localpart(form,  field)
+    Localpart(form, field)
 
     if field.data in ('postmaster', 'siteadmin'):
         logging.debug('Function Username. Username not allowed')
