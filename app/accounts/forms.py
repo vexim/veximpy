@@ -42,7 +42,7 @@ class AccountFormLocal(FlaskForm):
             _quotamin = 10
             _quotamax = self.domain.quotas
         self.quota.validators=[NumberRange(min=_quotamin, max=_quotamax)]
-        self.maxmsgsize.validators=[NumberRange(min=1000, max=self.domain.maxmsgsize)]
+        self.maxmsgsize.validators=[NumberRange(min=0, max=self.domain.maxmsgsize)]
 
         if self.action == 'add':
             del self.submitedit

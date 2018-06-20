@@ -14,6 +14,7 @@ settings = {
     # this is default but add what you think your yousers need. eg: !#$%&'*+-/=?^_`{|}~;
     # eMail addresses are _not_ case sensitive. even some $$$-companies believe the oposite.
     'USERNAMES_CHARSALLOWED': string.ascii_lowercase + string.digits + "@!#$%&*+-/=?^_{|}~.",
+    'USERNAMES_FORBIDDEN': {'postmaster', 'webmaster'},
 
     # default settings for passwords
     # PWDLENGTHMIN is a default _and_ a minimum value

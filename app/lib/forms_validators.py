@@ -109,7 +109,7 @@ def Username(form, field):
 
     Localpart(form, field)
 
-    if field.data in ('postmaster', 'siteadmin'):
+    if (field.data == 'siteadmin' and form.domain.domain_id>1) or field.data in settings['USERNAMES_FORBIDDEN']:
         logging.debug('Function Username. Username not allowed')
         raise ValidationError('Username ' + field.data + ' is not allowed.')
     UsernameExists(form,  field)
@@ -147,7 +147,7 @@ def UsernameExists(form, field):
     """
     if field.data is None:
         return
-    if 0 != User.query.filter(User.username==field.data).count():
+    if 0 != User.query.filter(User.username==field.data, User.domain_id!=form.domain.domain_id).count():
         logging.debug('Function UsernameExists. Account exists')
         raise ValidationError('Account exists.')
 

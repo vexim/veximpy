@@ -105,6 +105,7 @@ class TestValidators(ViewTestMixin):
 
         form = FormString(**{'x': 'siteadmin', 'localpart': 'testlocalpart'})
         form.domain.domain = 'example.com'
+        form.domain.domain_id = 2
         with pytest.raises(Exception) as excceptioninfo:
             Username(form, form.x)
         assert str(excceptioninfo.value) == 'Username ' + form.x.data + ' is not allowed.'
