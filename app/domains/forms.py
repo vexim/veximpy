@@ -8,7 +8,6 @@ from wtforms_components import read_only
 from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
 from ..lib.forms_fields import TextAreaSepListField
 from ..lib.forms_validators import IPList, PasswordRules, URI, DomainExists, QuotaDomains
-#from markupsafe import Markup
 from ..config.settings import domaindefaults, settings
 
 class DomainFormLocal(FlaskForm):
@@ -19,7 +18,6 @@ class DomainFormLocal(FlaskForm):
     def __init__(self, obj=None, action='add', *args, **kwargs):
         super().__init__(obj=obj)
         self.action = action.lower()
-        #self.process(obj=obj)
         if action.lower() == 'add':
             del self.submitedit
         elif action.lower() == 'edit':
@@ -31,7 +29,6 @@ class DomainFormLocal(FlaskForm):
             read_only(self.maildir)
             self.maildir.description = ''
             self.maildir.validators = []
-            #form.password1.flags.required = False
             self.pwdcharallowed = self.pwd_charallowed.data
 
     def domain_save(self, domain):
@@ -46,13 +43,6 @@ class DomainFormLocal(FlaskForm):
             domain.type = 'local'
             return True
         return False
-
-#    def validate(self):
-#        print(self.submitadd.__dict__)
-#        print(self.submitcancel.__dict__)
-#        if self.submitcancel.data and not FlaskForm.validate(self):
-#            return False
-#        return True
 
     action = 'add'
     pwdcharallowed = settings['PWDCHARSALLOWED']

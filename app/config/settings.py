@@ -161,6 +161,7 @@ domainlist_title = {
 accountlist_title = {
     'local': 'Local',
     'alias': 'Alias',
+    'fail': 'Fail',
 #    'list': 'Mailinglist',
 }
 

@@ -103,6 +103,13 @@ class TestValidators(ViewTestMixin):
             Username(form, form.x)
         assert str(excceptioninfo.value) == 'Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain
 
+        form = FormString(**{'x': 'notsiteadmin', 'localpart': 'testlocalpart'})
+        form.domain.domain = 'example.com'
+        form.domain.domain_id = 1
+        with pytest.raises(Exception) as excceptioninfo:
+            Username(form, form.x)
+        assert str(excceptioninfo.value) == 'Username for siteadmin has to be "siteadmin".'
+
         form = FormString(**{'x': 'siteadmin', 'localpart': 'testlocalpart'})
         form.domain.domain = 'example.com'
         form.domain.domain_id = 2

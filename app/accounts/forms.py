@@ -157,6 +157,60 @@ class AccountFormLocal(FlaskForm):
 
 
 class AccountFormAlias(FlaskForm):
+    """
+    Form for add/edit alias accounts
+    """
+
+    action = 'add'
+    domain = Domain()
+    pwdcharallowed = settings['PWDCHARSALLOWED']
+    pwdlengthmin = settings['PWDLENGTHMIN']
+
+    def __init__(self, label='', validators=None, obj=None, action='add', domain=None, *args, **kwargs):
+        self.action = action.lower()
+        if domain:
+            self.domain = domain
+        else:
+            raise ValueError('No domain object in AccountFormLocal.__init__')
+
+        super().__init__(obj=obj)
+        self.pwdcharallowed = self.domain.pwd_charallowed
+        self.pwdlengthmin = self.domain.pwd_lengthmin
+
+        if self.action == 'add':
+            del self.submitedit
+            self.domain_id = self.domain.domain_id
+        elif self.action == 'addpostmaster':
+            raise ValueError('Postmaster can not be an alias account')
+        elif self.action == 'edit':
+            del self.submitadd
+            self.password1.flags.required = False
+            read_only(self.localpart)
+            self.localpart.validators = []
+
+        if self.localpart.data == 'postmaster':
+            raise ValueError('Postmaster can not be an alias account')
+
+    def account_save(self, account):
+        if self.password1.data == '':
+            del self.password1
+            del self.password2
+
+        if self.validate_on_submit():
+            self.populate_obj(account)
+            account.domain_id = self.domain.domain_id
+            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.role = settings['ROLE_USER']
+            account.type = 'alias'
+
+            if self.username and self.username.data == '':
+                account.username = self.localpart.data + '@' + self.domain.domain
+            if self.password1 and self.password1.data != '':
+                account.password_set(self.password1.data)
+
+            return True
+        return False
+
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     realname = StringField('Realname', validators=[Length(min=1, max=255)])
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
@@ -165,8 +219,6 @@ class AccountFormAlias(FlaskForm):
     password_remove = BooleanField('Remove Password. Deny Login.', default=bool_checked(), false_values={0, False, 'false', ''})
     password1 = PasswordField('Password', description='Password only needed if you want the user to be able to log in, or if the Alias is the admin account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')
-    uid = IntegerField('System UID', default=99, validators=[NumberRange(min=99, max=65535)])
-    gid = IntegerField('System GID', default=99, validators=[NumberRange(min=99, max=65535)])
     admin = BooleanField('Domain Admin', default=0, false_values={0, False, 'false', ''})
     smtp = TextAreaSepListField('Address', description='Multiple addresses should be comma separated, with no spaces', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     on_avscan = BooleanField('Anti virus scan', description='Run anti virus scan on mails.', default=1, false_values={0, False, 'false', ''})
@@ -180,6 +232,50 @@ class AccountFormAlias(FlaskForm):
 
 
 class AccountFormFail(FlaskForm):
+    """
+    Form for add/edit fail accounts
+    """
+
+    action = 'add'
+    domain = Domain()
+    pwdcharallowed = settings['PWDCHARSALLOWED']
+    pwdlengthmin = settings['PWDLENGTHMIN']
+
+    def __init__(self, label='', validators=None, obj=None, action='add', domain=None, *args, **kwargs):
+        self.action = action.lower()
+        if domain:
+            self.domain = domain
+        else:
+            raise ValueError('No domain object in AccountFormLocal.__init__')
+
+        super().__init__(obj=obj)
+
+        if self.action == 'add':
+            del self.submitedit
+            self.domain_id = self.domain.domain_id
+        elif self.action == 'addpostmaster':
+            raise ValueError('Postmaster can not be a fail account')
+        elif self.action == 'edit':
+            del self.submitadd
+            read_only(self.localpart)
+            self.localpart.validators = []
+
+        if self.localpart.data == 'postmaster':
+            raise ValueError('Postmaster can not be an fail account')
+
+    def account_save(self, account):
+
+        if self.validate_on_submit():
+            self.populate_obj(account)
+            account.domain_id = self.domain.domain_id
+            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.role = settings['ROLE_USER']
+            account.type = 'fail'
+            account.username = self.localpart.data + '@' + self.domain.domain
+
+            return True
+        return False
+
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
@@ -195,7 +291,52 @@ class AccountFormMailinglist(FlaskForm):
 
 
 class AccountFormCatchall(FlaskForm):
+    """
+    Form for add/edit catchall account
+    """
+
+    action = 'add'
+    domain = Domain()
+    pwdcharallowed = settings['PWDCHARSALLOWED']
+    pwdlengthmin = settings['PWDLENGTHMIN']
+
+    def __init__(self, label='', validators=None, obj=None, action='add', domain=None, *args, **kwargs):
+        self.action = action.lower()
+        if domain:
+            self.domain = domain
+        else:
+            raise ValueError('No domain object in AccountFormLocal.__init__')
+
+        super().__init__(obj=obj)
+
+        if self.action == 'add':
+            del self.submitedit
+            self.domain_id = self.domain.domain_id
+        elif self.action == 'addpostmaster':
+            raise ValueError('Postmaster can not be a catchall account')
+        elif self.action == 'edit':
+            del self.submitadd
+            read_only(self.localpart)
+            self.localpart.validators = []
+
+        if self.localpart.data == 'postmaster':
+            raise ValueError('Postmaster can not be an catchall account')
+
+    def account_save(self, account):
+
+        if self.validate_on_submit():
+            self.populate_obj(account)
+            account.domain_id = self.domain.domain_id
+            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.role = settings['ROLE_USER']
+            account.type = 'fail'
+            account.username = self.localpart.data + '@' + self.domain.domain
+
+            return True
+        return False
+
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
+    comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
     smtp = TextAreaSepListField('Address', description='', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')

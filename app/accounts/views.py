@@ -29,7 +29,7 @@ def accountlist(domainid, accounttype):
     """
 
     if accounttype == 'local':
-        accounttype_list = ['local',  'piped']
+        accounttype_list = ['local', 'piped']
     else:
         accounttype_list = [accounttype]
 

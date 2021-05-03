@@ -68,6 +68,7 @@ def IPList(form, field):
         for _ in field.data.split(';'):
             if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())):
                 invalidip += _.strip() + ', '
+#        map(lambda _: 'if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())): invalidip += _.strip() + ", "', field.data.split(';'))
     if invalidip != '':
         logging.debug('Function IPList. Invalid IP address')
         raise ValidationError('Invalid IP address: ' + invalidip[:-2])
@@ -108,6 +109,10 @@ def Username(form, field):
         raise ValidationError('Username can not be an eMail address except ' + form.localpart.data + '@' + form.domain.domain)
 
     Localpart(form, field)
+
+    if field.data != 'siteadmin' and form.domain.domain_id == 1:
+        logging.debug('Username for siteadmin has to be "siteadmin".')
+        raise ValidationError('Username for siteadmin has to be "siteadmin".')
 
     if (field.data == 'siteadmin' and form.domain.domain_id>1) or field.data in settings['USERNAMES_FORBIDDEN']:
         logging.debug('Function Username. Username not allowed')

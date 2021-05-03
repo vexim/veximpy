@@ -8,7 +8,7 @@ MIGRATIONS_DIR="${BASE_DIR}/migrations"
 INSTANCE_CONFIG="${BASE_DIR}/instance/config.py"
 DBREINIT_SH="${BASE_DIR}/setup/dbreinit.sh"
 
-if [[ -d "${MIGRATIONS_DIR=}" ]]; then
+if [[ -d "${MIGRATIONS_DIR}" ]]; then
     echo "Directory 'migrations' exists. If you really want to install a new DB remove it: \`rm -r ${MIGRATIONS_DIR}\`"
     exit
 fi

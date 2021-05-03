@@ -62,7 +62,8 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuAccounts">
                             <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='local') }}">Local Accounts</a>
-                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='alias') }}">Alias Accounts</a>{% if False %}
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='alias') }}">Alias Accounts</a>
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='fail') }}">Fail Accounts</a>{% if False %}
                             <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist') }}">Groups</a>{% endif %}
                             <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='list') }}">Mailinglists</a>
                         </div>
