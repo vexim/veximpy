@@ -11,7 +11,7 @@
 #
 # create the dump.sql, where "vexim2db" is the name of your original vexim2 DB.
 # provide username and hostname. you will be prompted for a password for the given user.
-# mysqldump --user=<username> -p --host=<dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "vexim2db"
+# mysqldump --user=<username> -p --host=<dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "vexim2db" > dump.sql
 #
 
 DUMPFILE="${1}"

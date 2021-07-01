@@ -9,6 +9,8 @@ fi
 
 echo -e "\n\n####################\nflask db migrate\n"
 flask db migrate
+# need additional import in version file before doing the upgrade
+# see https://github.com/miguelgrinberg/Flask-Migrate/issues/195
 grep -l -s -L 'from sqlalchemy.schema import FetchedValue' migrations/versions/*.py | \
     xargs sed -i 's/^import\ssqlalchemy\sas\ssa/import sqlalchemy as sa\nfrom sqlalchemy.schema import FetchedValue/'
 

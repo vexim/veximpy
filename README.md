@@ -13,7 +13,7 @@ Eg: `mkdir -p ~/projects/veximpy; cd ~/projects/veximpy`
 
 Get the code `git clone git@gitlab.com:runout/veximpy.git`
 
-Call `bash pysetup.sh`
+Call `bash setup/pysetup.sh`
 
 This creates a virtual environment under `venv` and modified templates for nginx and uwsgi under `doc`
 
@@ -27,7 +27,7 @@ In `wsgi.py` set **os.environ['FLASK_CONFIG'] = 'production'**
 
 Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.
 
-Then simply call: `bash dbinstall.sh <targetDBname>`
+Then simply call: `bash setup/dbinstall.sh <targetDBname>`
 
 This will create tables in the DB <targetDBname> and create the siteadmin user.
 
@@ -41,9 +41,14 @@ Make sure there is no `migrations/` directory.
 
 Create a dump from your original vexim DB.
 
-Eg: `mysqldump -u <username> -p -h <dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "<vexim2db>"`
+Eg: `mysqldump -u <username> -p -h <dbhost> --default-character-set=utf8 --single-transaction=TRUE --routines --events "<vexim2db>" > dump.sql`
 
-Create a DB user for the new DB.
+Create a DB user for the new DB. Replace 10.0.0.% with the host or network where the veximpy application resides.
+
+```
+echo "CREATE USER '<username>'@'10.0.0.%' IDENTIFIED BY '<password>';" | mysql
+echo "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON '<targetDBname>'.* TO '<username>'@'10.0.0.%';" | mysql
+```
 
 Then call (with 3 parameters):
 
@@ -81,9 +86,9 @@ Eg: `app/static/ressources/example.com/logo.svg`
 
 # Automated tests
 
-If you want to run tests, create an additional DB `veximtest_test`, as tests destroy all data, create there own data and truncate all tables in the end! The test DB is configured in `instance/config.py`
+If you want to run tests, create an additional DB `veximtest_test`! Tests destroy all data, create there own data and truncate all tables in the end! The test DB is configured in `instance/config.py`
 
-`pytest -v` will run all configureed tests.
+`pytest -v` will run all configured tests.
 
 See the `app/tests` directory and `app/lib/tests.py`.
 

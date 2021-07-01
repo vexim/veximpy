@@ -215,7 +215,7 @@ class AccountFormAlias(FlaskForm):
     realname = StringField('Realname', validators=[Length(min=1, max=255)])
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     username = StringField('Username', validators=[Length(min=1, max=255)])
-    comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
+    comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     password_remove = BooleanField('Remove Password. Deny Login.', default=bool_checked(), false_values={0, False, 'false', ''})
     password1 = PasswordField('Password', description='Password only needed if you want the user to be able to log in, or if the Alias is the admin account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')
@@ -278,7 +278,7 @@ class AccountFormFail(FlaskForm):
 
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
-    comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
+    comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
     submitcancel = SubmitField('Cancel')
@@ -336,7 +336,7 @@ class AccountFormCatchall(FlaskForm):
         return False
 
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
-    comment = StringField('Comment', validators=[Optional, Length(min=0, max=255)])
+    comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     smtp = TextAreaSepListField('Address', description='', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
