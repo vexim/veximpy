@@ -14,19 +14,22 @@ app = create_app(config_name)
 # create siteadmin user and domain
 def create_siteadmin(self, siteadmin_password):
     with app.app_context():
-        d = db.session.query(label('count', func.count(Domain.domain_id))).filter(Domain.is_sitedomain).one()
-        if d[0].count != 0:
+        d = db.session.query(func.count(Domain.domain_id).label('count')).filter(Domain.domain_id == 1).one()
+        print("d.count", d.count)
+        if d.count != 0:
             print("Sitedomain already exists")
         else:
             domain = Domain(**sitedomaindefaults)
             db.session.add(domain)
             db.session.commit()
 
-        u = db.session.query(label('count', func.count(User.user_id))).filter(User.user_id == 1).all()
-        if u[0].count != 0:
+        u = db.session.query(func.count(User.user_id).label('count')).filter(User.user_id == 1).one()
+        print("u.count", u.count)
+        if u.count != 0:
             print("Siteadmin user already exists")
         else:
             user = User(**siteadmindefaults)
+            print("User", User)
             user.password_set(siteadmin_password)
             db.session.add(user)
             db.session.commit()

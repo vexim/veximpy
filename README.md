@@ -27,6 +27,17 @@ In `wsgi.py` set **os.environ['FLASK_CONFIG'] = 'production'**
 
 Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.
 
+Shell-Example to create DB `veximtest` and DB user `vximpy`. Additionally i create a DB `veximtest_test` for `pytest` named:
+
+```
+echo "CREATE USER 'veximpy'@localhost IDENTIFIED BY '<STRONG_PASSWORD>';" | mysql
+echo "CREATE DATABASE veximtest;" | mysql
+echo "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON veximtest.* TO 'veximpy'@localhost;" | mysql
+echo "CREATE DATABASE veximtest_test;" | mysql
+echo "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER ON veximtest_test.* TO 'veximpy'@localhost;" | mysql
+echo "FLUSH PRIVILGES;" | mysql
+```
+
 Then simply call: `bash setup/dbinstall.sh <targetDBname>`
 
 This will create tables in the DB <targetDBname> and create the siteadmin user.

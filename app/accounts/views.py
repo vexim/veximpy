@@ -98,14 +98,17 @@ def account_add(domainid, accounttype):
         form = AccountFormLocal(obj=account, action='add', domain=domain)
     elif accounttype == 'alias':
         form = AccountFormAlias(action='add', domain=domain)
-#    elif accounttype == 'list':
-#        form = AccountFormMailinglist(action='add', domain=domain)
+    #elif accounttype == 'list':
+    #     form = AccountFormMailinglist(action='add', domain=domain)
 
     #if request.method == 'GET':
         #form.process(MultiDict(domaindefaults))
     accountname = form.username.data
 
     if request.method == 'POST':
+        if form.submitcancel.data:
+            return redirect(url_for('accounts.accountlist', domainid=account.domain_id, accounttype=accounttype))
+
         if form.account_save(account):
             try:
                 db.session.add(account)

@@ -1,15 +1,21 @@
 #!/bin/bash
 # This file is part of veximpy
 
-sudo apt install python3 python3-venv python3-pip
+sudo apt install mariadb-server python3 python3-venv python3-pip python3-pytest python3-flask python3-flask-login python3-flask-migrate python3-dotenv python3-passlib python3-flaskext.wtf python3-validators python3-wtforms python3-pymysql python3-sqlalchemy
+sudo apt install nginx-full uwsgi uwsgi-plugin-python3
+
+# Create Virtual Environment
 python3 -m venv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
 ln -s venv/bin/activate
-echo "export FLASK_CONFIG=development; export FLASK_APP=run.py; export PYTHONPATH=${PYTHONPATH}:$(dirname ${0})" >> activate
 
-sed "s/###dir###/$(dirname ${0})/" doc/nginx/veximpy.template > doc/nginx/veximpy
-sed "s/###dir###/$(dirname ${0})/" doc/uwsgi/veximpy.ini.template > doc/uwsgi/veximpy.ini
+
+echo "export FLASK_CONFIG=development; export FLASK_APP=run.py; export PYTHONPATH=${PYTHONPATH}:$(pwd))" >> activate
+
+# Prepare the config files for uwsgi and nginx
+sed "s/###dir###/$(pwd)/" doc/nginx/veximpy.template > doc/nginx/veximpy
+sed "s/###dir###/$(pwd)/" doc/uwsgi/veximpy.ini.template > doc/uwsgi/veximpy.ini
 
 if [[ ! -z ${1} ]]; then
     sed "s/###servername###/${1}/" doc/nginx/veximpy.template > doc/nginx/veximpy

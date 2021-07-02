@@ -151,9 +151,9 @@ class AccountFormLocal(FlaskForm):
                     description='If possible use a sieve filter of your mail delivery agent. Ask your sysadmin.',
                     false_values={0, False, 'false', ''})
     vacation = TextAreaField('Vacation message', validators=[Length(min=0, max=255)])
-    submitadd = SubmitField('Add domain')
-    submitedit = SubmitField('Save domain')
-    submitcancel = SubmitField('Cancel')
+    submitadd = SubmitField('Add accont')
+    submitedit = SubmitField('Save account')
+    submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})
 
 
 class AccountFormAlias(FlaskForm):
@@ -226,8 +226,8 @@ class AccountFormAlias(FlaskForm):
     sa_tag = IntegerField('Tag spam above this score', description='Above this score the "X-Spam-Flag: YES" header will be added.', default=3, validators=[NumberRange(min=0, max=99)])
     sa_refuse = IntegerField('Refuse spam above this score', default=5, validators=[NumberRange(min=0, max=99)])
     spam_drop = BooleanField('Move mails above "refuse score" to Junk folder or if disabled delete it.', default=1, false_values={0, False, 'false', ''})
-    submitadd = SubmitField('Add domain')
-    submitedit = SubmitField('Save domain')
+    submitadd = SubmitField('Add account')
+    submitedit = SubmitField('Save account')
     cancel = SubmitField('Cancel')
 
 
@@ -279,15 +279,15 @@ class AccountFormFail(FlaskForm):
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
-    submitadd = SubmitField('Add domain')
-    submitedit = SubmitField('Save domain')
-    submitcancel = SubmitField('Cancel')
+    submitadd = SubmitField('Add account')
+    submitedit = SubmitField('Save account')
+    submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})
 
 
 class AccountFormMailinglist(FlaskForm):
-    submitadd = SubmitField('Add domain')
-    submitedit = SubmitField('Save domain')
-    submitcancel = SubmitField('Cancel')
+    submitadd = SubmitField('Add account')
+    submitedit = SubmitField('Save account')
+    submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})
 
 
 class AccountFormCatchall(FlaskForm):
@@ -338,6 +338,6 @@ class AccountFormCatchall(FlaskForm):
     localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     smtp = TextAreaSepListField('Address', description='', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
-    submitadd = SubmitField('Add domain')
-    submitedit = SubmitField('Save domain')
-    submitcancel = SubmitField('Cancel')
+    submitadd = SubmitField('Add account')
+    submitedit = SubmitField('Save account')
+    submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})
