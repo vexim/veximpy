@@ -41,8 +41,8 @@ def domainlist(domaintype):
 @domains.route('/domains_enabled/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 @domains.route('/domains_enabled/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
-@domainid_check
 @siteadmin_required
+@domainid_check
 def domains_enabled(domainid, domaintype):
     """
     Render the homepage template on the / route
@@ -72,8 +72,8 @@ def domains_enabled(domainid, domaintype):
 
 @domains.route('/domains_add/<domaintype>', methods=['GET', 'POST'])
 @domains.route('/domains_add/', defaults={'domaintype': 'local'}, methods=['GET', 'POST'])
-@siteadmin_required
 @login_required
+@siteadmin_required
 @domaintyp_required
 def domains_add(domaintype):
     """
@@ -86,8 +86,10 @@ def domains_add(domaintype):
         form = DomainFormLocal(obj=Domain(**domaindefaults), action='add')
         #form.process(**domaindefaults)
     elif domaintype == 'alias':
+        domain_id_available = (Domain.query.with_entities(Domain.domain_id, Domain.domain).filter(Domain.domain_id>1)).filter(Domain.type == 'local').order_by(Domain.domain).all()
+        domain_id_list = [(_.domain_id, _.domain) for _ in domain_id_available]
         form = DomainFormAlias(obj=Domainalia(**aliasdomaindefaults), action='add')
-        form.domain_id.choices = (Domain.query.with_entities(Domain.domain_id, Domain.domain).filter(Domain.domain_id>1)).filter(Domain.type == 'local').order_by(Domain.domain).all()
+        form.domain_id.choices = domain_id_list
         #form.process(**aliasdomaindefaults)
     elif domaintype == 'relay':
         form = DomainFormRelay(obj=Domain(**domaindefaults), action='add')
@@ -184,9 +186,9 @@ def domains_add(domaintype):
 @domains.route('/domains_edit/<int:domainid>/<domaintype>/', methods=['GET', 'POST'])
 #@domains.route('/domains_edit/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
-@domainid_check
 @siteadmin_required
 @domaintyp_required
+@domainid_check
 def domains_edit(domainid, domaintype):
     """
     Render the homepage template on the / route
@@ -249,8 +251,8 @@ def domains_edit(domainid, domaintype):
 @domains.route('/domains_delete/', defaults={'domainid': 0, 'domaintype': 'local'}, methods=['GET', 'POST'])
 @login_required
 @siteadmin_required
-@domainid_check
 @domaintyp_required
+@domainid_check
 def domains_delete(domainid, domaintype):
     """
     Render the homepage template on the / route

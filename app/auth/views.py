@@ -66,8 +66,7 @@ def login():
         if not is_safe_url(next):
             return flask.abort(400)
 
-        return redirect(next or url_for('domains.domainlist'))
-        #redirect_home()
+        return redirect(next or url_for('home.homepage'))
 
     # load login template
     return render_template('auth/login.html', domainname = request.host, form=form, title='Login')

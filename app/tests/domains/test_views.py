@@ -114,7 +114,7 @@ class TestDomains(ViewTestMixin):
 
         _url = url_for('domains.domains_add', domaintype='alias')
         print('_url ', _url)
-        response = self.client.get(str(_url))
+        response = self.client.get(_url)
         assert_status_with_message(200, response, self.responses['DOMAIN_ADD_ALIAS_OK'])
 
         self.logout()

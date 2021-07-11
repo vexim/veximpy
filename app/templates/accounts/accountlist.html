@@ -113,8 +113,8 @@
                         {% endif %}
                       </td>
                   {% endif %}
-                  <td style="text-align:center;">
-                    {% if not account.is_postmaster %}
+                  <td style="text-align:center;" title="You can not disable a postmaster/siteadmin account">
+                    {% if not (account.is_postmaster or account.is_siteadmin) %}
                         <a href="{{ url_for('accounts.account_enabled', accountid=account.id, accounttype=accounttype) }}">
                         {% if account.enabled %}
                           <i class="fa fa-toggle-on"></i> 
@@ -135,7 +135,7 @@
                         <i class="far fa-edit"></i>
                     </a>
                   </td>
-                  <td style="text-align:center;" title="You can not delete an enabled account or a postmaster account">
+                  <td style="text-align:center;" title="You can not delete an enabled account or a postmaster/siteadmin account">
                     {% if account.is_deleteable %}
                         <a href="{{ url_for('accounts.account_delete', accountid=account.id, accounttype=accounttype) }}">
                             <i class="far fa-trash-alt"></i> 

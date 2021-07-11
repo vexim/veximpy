@@ -59,7 +59,7 @@ class AccountFormLocal(FlaskForm):
         if settings['POSTMASTER_CHANGEUIDGID'] != 1:
             del self.uid
             del self.gid
-        if self.localpart.data == 'postmaster':
+        if self.localpart.data in ['postmaster', 'siteadmin']:
             del self.username
             del self.enabled
             del self.admin

@@ -20,9 +20,9 @@ from ..lib.decorators import accountid_check, accounttyp_required, domainid_chec
 @accounts.route('/accountlist/<int:domainid>/',  defaults={'accounttype': 'local'})
 @accounts.route('/accountlist/',  defaults={'domainid': 0, 'accounttype': 'local'})
 @login_required
-@domainid_check
 @postmaster_required
 @accounttyp_required
+@domainid_check
 def accountlist(domainid, accounttype):
     """
     Render the domainlist template on the / route
@@ -47,9 +47,9 @@ def accountlist(domainid, accounttype):
 
 @accounts.route('/account_enabled/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_enabled/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
-@accountid_check
-@postmaster_required
 @login_required
+@postmaster_required
+@accountid_check
 def account_enabled(accountid, accounttype):
     """
     Render the homepage template on the / route
@@ -77,8 +77,8 @@ def account_enabled(accountid, accounttype):
 
 @accounts.route('/account_add/<int:domainid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_add/<int:domainid>', defaults={'accounttype': 'local'}, methods=['GET', 'POST'])
-@postmaster_required
 @login_required
+@postmaster_required
 @accounttyp_required
 def account_add(domainid, accounttype):
     """
@@ -141,7 +141,7 @@ def account_add(domainid, accounttype):
 
 @accounts.route('/account_edit/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_edit/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
-@user_required
+#@user_required
 @login_required
 @accounttyp_required
 def account_edit(accountid, accounttype):
@@ -194,8 +194,8 @@ def account_edit(accountid, accounttype):
 
 @accounts.route('/account_delete/<int:accountid>/<accounttype>')
 @accounts.route('/account_delete/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
-@postmaster_required
 @login_required
+@postmaster_required
 def account_delete(accountid, accounttype):
     """
     Render the homepage template on the / route

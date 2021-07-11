@@ -87,11 +87,11 @@ def URI(form, field):
     else:
         try:
             resolve(field.data, 'MX')
-        except NXDOMAIN:
-            logging.debug('Function URI. No DNS MX record found')
+        except NXDOMAIN as e:
+            logging.debug('Function URI. No DNS MX record found', e)
             raise ValidationError('No DNS MX record found.')
         except DNSException as e:
-            logging.debug('Function URI. DNS error')
+            logging.debug('Function URI. DNS error ', e)
             raise ValidationError('DNS error.')
 
 def Username(form, field):
