@@ -41,6 +41,11 @@ def user_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         accountid = _get_accountid(kwargs)
+
+        if not current_user.is_authenticated:
+            flash(Markup('You are not logged in.'), 'error')
+            return redirect_home()
+
         if not (current_user.id == accountid
                 or current_user.is_postmaster == _get_domainid(kwargs)
                 or (current_user.is_siteadmin)

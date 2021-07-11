@@ -1,8 +1,10 @@
 #!/bin/bash
 # This file is part of veximpy
 
+# Install Python packages in the system
 sudo apt install mariadb-server python3 python3-venv python3-pip python3-pytest python3-flask python3-flask-login python3-flask-migrate python3-dotenv python3-passlib python3-flaskext.wtf python3-validators python3-wtforms python3-pymysql python3-sqlalchemy
 sudo apt install nginx-full uwsgi uwsgi-plugin-python3
+sudo pip3 install flask_bootstrap flask_debugtoolbar wtforms
 
 # Create Virtual Environment
 python3 -m venv venv

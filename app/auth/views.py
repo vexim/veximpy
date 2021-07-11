@@ -1,13 +1,14 @@
 # app/auth/views.py
 
 import validators
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from markupsafe import Markup
 from . import auth
 from .forms import LoginForm
 from ..models.models import User
 from ..home.views import redirect_home
+from ..lib.url import is_safe_url
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -23,6 +24,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             # log user in
             login_user(user)
+            session.permanent = True
             return True
         return False
 
@@ -56,7 +58,16 @@ def login():
             flash(Markup('Login succeded for user <b>' + user.username + '</b>'),  'success')
         else: # if not user.is_active
             flash(Markup('User <i>' + str(user.username) + '</i> is disabled.'), 'warning')
-        return redirect_home()
+
+
+        next = request.args.get('next')
+        # is_safe_url should check if the url is safe for redirects.
+        # See http://flask.pocoo.org/snippets/62/ for an example.
+        if not is_safe_url(next):
+            return flask.abort(400)
+
+        return redirect(next or url_for('domains.domainlist'))
+        #redirect_home()
 
     # load login template
     return render_template('auth/login.html', domainname = request.host, form=form, title='Login')

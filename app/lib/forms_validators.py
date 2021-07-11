@@ -6,8 +6,9 @@ Functions:
 
 #import string
 import logging
-import dns.resolver
 import validators
+from dns.resolver import resolve, NXDOMAIN
+from dns.exception import DNSException
 from wtforms import ValidationError
 from ..config.settings import settings, domaindefaults
 from ..models.models import Domain, Domainalia, User
@@ -85,11 +86,11 @@ def URI(form, field):
         raise ValidationError('Invalid domain name.')
     else:
         try:
-            dns.resolver.query(field.data, 'MX')
-        except dns.resolver.NXDOMAIN:
+            resolve(field.data, 'MX')
+        except NXDOMAIN:
             logging.debug('Function URI. No DNS MX record found')
             raise ValidationError('No DNS MX record found.')
-        except:
+        except DNSException as e:
             logging.debug('Function URI. DNS error')
             raise ValidationError('DNS error.')
 

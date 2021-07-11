@@ -112,7 +112,9 @@ class TestDomains(ViewTestMixin):
     def test_aliasdomainadd(self, db):
         self.login(settings['TEST_USER_SITEADMIN'], settings['TEST_PW_SITEADMIN'])
 
-        response = self.client.get(url_for('domains.domains_add', domaintype='alias'))
+        _url = url_for('domains.domains_add', domaintype='alias')
+        print('_url ', _url)
+        response = self.client.get(str(_url))
         assert_status_with_message(200, response, self.responses['DOMAIN_ADD_ALIAS_OK'])
 
         self.logout()

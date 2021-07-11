@@ -1,7 +1,7 @@
 Right now lots of things are untested!
 Use this code on your own risk!
 
-# Install & Upgrade
+# Install & Migration from vexim2
 
 If you get some `Duplicate index` warnings - ignore them.
 
@@ -19,7 +19,7 @@ This creates a virtual environment under `venv` and modified templates for nginx
 
 If a domain/server name is provided as first parameter it will be used for the nginx template. 
 
-You have to **edit the DB credencials** and set **SECRET\_KEY** in `instance/config.py`.
+You have to **edit the DB credentials** and set **SECRET\_KEY** in `instance/config.py`.
 
 In `wsgi.py` set **os.environ['FLASK_CONFIG'] = 'production'**
 
@@ -44,7 +44,7 @@ This will create tables in the DB <targetDBname> and create the siteadmin user.
 
 If \<targetDBname\> is ommited, 'veximtest' will be used as target DB.
 
-## Upgrade an existing vexim2 DB
+## Migrate an existing vexim2 DB
 
 Migration should be done to a new DB. (in-place-migration is not reccomended due to potentional data loss)
 

@@ -45,7 +45,7 @@ class Domainalia(db.Model):
     host_imap = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_imap'])
     host_pop = db.Column(db.String(64, 'utf8mb4_unicode_ci'), server_default=domaindefaults['host_pop'])
 
-    domain = db.relationship('Domain', primaryjoin='Domainalia.domain_id == Domain.domain_id', backref='domainalias')
+    #domain = db.relationship('Domain', primaryjoin='Domainalia.domain_id == Domain.domain_id', backref='domainalias')
 
     @property
     def id(self):
@@ -87,11 +87,11 @@ class Domain(db.Model):
     pwd_lengthmin = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_lengthmin']))
     pwd_rules = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_rules']))
 
-    users = db.relationship('User', primaryjoin='User.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains1', lazy='dynamic')
+    users = db.relationship('User', primaryjoin='User.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains', lazy='dynamic')
     localusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "local")', cascade="save-update, merge, delete", backref='domains2', lazy='dynamic')
     aliasusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "alias")', cascade="save-update, merge, delete", backref='domains3', lazy='dynamic')
     postmasters = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.role.op("&")(128) == 128)', backref='domains4', lazy='dynamic')
-    aliases = db.relationship('Domainalia', primaryjoin='Domainalia.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains5', lazy='dynamic')
+    aliases = db.relationship('Domainalia', primaryjoin='Domainalia.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domain', lazy='dynamic')
 
     @property
     def id(self):
@@ -213,7 +213,7 @@ class User(db.Model, UserMixin):
     vacation = db.Column(db.Text(collation='utf8mb4_unicode_ci'))
     role = db.Column(db.Integer, nullable=False, server_default='0')
 
-    domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')
+    #domains = db.relationship('Domain', primaryjoin='User.domain_id == Domain.domain_id', backref='users1', lazy='joined')
 
     @property
     def id(self):
