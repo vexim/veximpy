@@ -162,6 +162,7 @@ accountlist_title = {
     'local': 'Local',
     'alias': 'Alias',
     'fail': 'Fail',
+    'catch': 'Catchall',
 #    'list': 'Mailinglist',
 }
 

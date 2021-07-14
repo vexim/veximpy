@@ -81,7 +81,7 @@
                 <tr{% if not domain.enabled %} class="disabled"{% endif %}>
                   <td title="{{ domain.comment }}"> <a id="{{ domain.domain_id }}" class="anchor-top""></a>{{ domain.domainname }}</td>
                   {% if domaintype=='alias' %}
-                    <td>{{ domain.domain.domain }}</td>
+                    <td>{{ domain.domains }}</td>
                   {% endif %}
                   {% if domaintype=='local' %}
                         <td>{{ domain.relayto }}</td>

@@ -63,9 +63,10 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuAccounts">
                             <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='local') }}">Local Accounts</a>
                             <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='alias') }}">Alias Accounts</a>
-                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='fail') }}">Fail Accounts</a>{% if False %}
-                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist') }}">Groups</a>{% endif %}
-                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='list') }}">Mailinglists</a>
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='fail') }}">Fail Accounts</a>
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.account_add', domainid=domainid, accounttype='catch') }}">Catchall Account</a>{% if False %}
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist') }}">Groups</a>
+                            <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.accountlist', domainid=domainid, accounttype='list') }}">Mailinglists</a>{% endif %}
                         </div>
                     </div>
                 {% endif %}
@@ -80,7 +81,7 @@
                           <i class="fa fa-user"></i> {{ current_user.username }}
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuUser">
-                          <a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.account_edit', accountid=current_user.id, accounttype='local') }}">Account settings</a>
+                          {% if False %}<a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.account_edit', accountid=current_user.id, accounttype='local') }}">Account settings</a>{% endif %}
                           {% if False %}<a class="nav-item nav-link dropdown-item" href="{{ url_for('accounts.blocklist_edit', accountid=current_user.id, accounttype='local') }}">Blocklist</a>{% endif %}
                           <a class="nav-item nav-link dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
                         </div>

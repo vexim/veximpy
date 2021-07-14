@@ -5,6 +5,7 @@ import os
 import logging
 
 from dotenv import load_dotenv
+from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
@@ -30,6 +31,7 @@ class DevelopmentConfig(Config):
     #SQLALCHEMY_ECHO = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SERVER_NAME = 'veximpy.runout.at'
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=60)
     logging.basicConfig(level=logging.DEBUG)
 
 
@@ -39,6 +41,7 @@ class ProductionConfig(Config):
     """
 
     DEBUG = False
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=10)
     logging.basicConfig(level=logging.WARNING)
 
 class TestsConfig(Config):

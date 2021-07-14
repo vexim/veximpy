@@ -12,7 +12,7 @@ from dns.exception import DNSException
 from wtforms import ValidationError
 from ..config.settings import settings, domaindefaults
 from ..models.models import Domain, Domainalia, User
-
+from .validators import passwordCheck
 
 def PasswordRules(form, field):
     """
@@ -20,11 +20,20 @@ def PasswordRules(form, field):
     Password length
     Allowed characters
     """
-    val_msg = []
-    val_fail = False
+    #val_msg = []
+    #val_fail = False
 
-    if field.data is None:
-        return
+    if field.data:
+        checkresult = passwordCheck(field.data, lengthmin=form.pwdlengthmin, charallowed=form.pwdcharallowed)
+        logging.debug('passwordCheck: ' + str(checkresult))
+        if checkresult:
+            logging.debug('passwordCheck: failed.')
+            raise ValidationError(checkresult)
+    elif form.action == 'add':
+        logging.debug('Empty password is not allowed.')
+        raise ValidationError('Empty password is not allowed.')
+
+def ignore():
 
     if hasattr(form, 'pwd_lengthmin'):
         if len(field.data) < form.pwd_lengthmin.data:
@@ -69,7 +78,6 @@ def IPList(form, field):
         for _ in field.data.split(';'):
             if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())):
                 invalidip += _.strip() + ', '
-#        map(lambda _: 'if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())): invalidip += _.strip() + ", "', field.data.split(';'))
     if invalidip != '':
         logging.debug('Function IPList. Invalid IP address')
         raise ValidationError('Invalid IP address: ' + invalidip[:-2])
@@ -103,6 +111,8 @@ def Username(form, field):
     Check if this username is already in username
     
     """
+
+    # make sure we do not highjack usernames from other domains
     if field.data is None or field.data == form.localpart.object_data + '@' + form.domain.domain:
         return
     if '@' in field.data:
@@ -111,21 +121,24 @@ def Username(form, field):
 
     Localpart(form, field)
 
+    # check for not highjacking the siteadmin account
     if field.data != 'siteadmin' and form.domain.domain_id == 1:
         logging.debug('Username for siteadmin has to be "siteadmin".')
         raise ValidationError('Username for siteadmin has to be "siteadmin".')
 
-    if (field.data == 'siteadmin' and form.domain.domain_id>1) or field.data in settings['USERNAMES_FORBIDDEN']:
+    # check for special/forbidden usernames
+    if (field.data == 'siteadmin' and form.domain.domain_id != 1) or field.data in settings['USERNAMES_FORBIDDEN']:
         logging.debug('Function Username. Username not allowed')
         raise ValidationError('Username ' + field.data + ' is not allowed.')
-    UsernameExists(form,  field)
+    UsernameExists(form, field)
+
 
 def Localpart(form, field):
 #    import re
     
     if any(not _ in settings['USERNAMES_CHARSALLOWED'] for _ in field.data):
         logging.debug('Function Localpart. illegal characters')
-        raise ValidationError('Localpart contains illegal characters.')
+        raise ValidationError('Localpart contains illegal characters. Allowed characters: ' + form.pwdcharallowed)
 
 #    if settings('CHECK_RCPT_REMOTE_LOCALPARTS'):
 #        """see exim4 CHECK_RCPT_REMOTE_LOCALPARTS macro"""
@@ -154,8 +167,8 @@ def UsernameExists(form, field):
     if field.data is None:
         return
     if 0 != User.query.filter(User.username==field.data, User.domain_id!=form.domain.domain_id).count():
-        logging.debug('Function UsernameExists. Account exists')
-        raise ValidationError('Account exists.')
+        logging.debug('Function UsernameExists. Username exists')
+        raise ValidationError('Username exists.')
 
 def LocalpartExists(form, field):
     """

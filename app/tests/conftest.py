@@ -19,7 +19,7 @@ from app.config.tests import settings as test_settings
 
 from app.models.models import Domain, Domainalia, User
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def app():
     """
     Setup our flask test app, this only gets executed once.
@@ -43,7 +43,7 @@ def app():
     ctx.pop()
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def client(app):
     """
     Setup an app client, this gets executed for each test function.
@@ -133,7 +133,7 @@ def db(app):
     return _db
 
 
-@pytest.yield_fixture(scope='function')
+@pytest.fixture(scope='function')
 def session(db):
     """
     Allow very fast tests by using rollbacks and nested sessions. This does
@@ -194,7 +194,7 @@ def users(db):
 
     return db
 
-#@pytest.yield_fixture(scope='function')
+#@pytest.fixture(scope='function')
 #def domains(db):
 #    """
 #    Allow very fast tests by using rollbacks and nested sessions. This does

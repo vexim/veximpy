@@ -88,10 +88,10 @@ class Domain(db.Model):
     pwd_rules = db.Column(db.Integer, nullable=False, server_default=str(domaindefaults['pwd_rules']))
 
     users = db.relationship('User', primaryjoin='User.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains', lazy='dynamic')
-    localusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "local")', cascade="save-update, merge, delete", backref='domains2', lazy='dynamic')
-    aliasusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "alias")', cascade="save-update, merge, delete", backref='domains3', lazy='dynamic')
-    postmasters = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.role.op("&")(128) == 128)', backref='domains4', lazy='dynamic')
-    aliases = db.relationship('Domainalia', primaryjoin='Domainalia.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domain', lazy='dynamic')
+    localusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "local")', backref='domains_localusers', viewonly=True, lazy='dynamic')
+    aliasusers = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.type == "alias")', backref='domains_aliasusers', viewonly=True, lazy='dynamic')
+    postmasters = db.relationship('User', primaryjoin='and_(User.domain_id == Domain.domain_id, User.role.op("&")(128) == 128)', viewonly=True, lazy='dynamic')
+    aliases = db.relationship('Domainalia', primaryjoin='Domainalia.domain_id == Domain.domain_id', cascade="save-update, merge, delete", backref='domains', lazy='dynamic')
 
     @property
     def id(self):
@@ -184,7 +184,7 @@ class User(db.Model, UserMixin):
     domain_id = db.Column(db.ForeignKey('domains.domain_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     comment = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     localpart = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, index=True, server_default='')
-    username = db.Column(db.String(255, 'utf8mb4_unicode_ci'), nullable=False, server_default='')
+    username = db.Column(db.String(255, 'utf8mb4_unicode_ci'), unique=True, nullable=False, server_default='')
     clear = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     crypt = db.Column(db.String(255, 'utf8mb4_unicode_ci'))
     uid = db.Column(db.SmallInteger, nullable=False, server_default=str(domaindefaults['uid']))
@@ -281,10 +281,16 @@ class User(db.Model, UserMixin):
         """
         Set password to a hashed password
         """
+        if password in [None, '']:
+            self.crypt = None
+            return
+
         if settings['PWD_CRYPT_METHOD'] == 'pbkdf2_sha256':
             self.crypt = pbkdf2_sha256.hash(password)
         else:
             self.crypt = pbkdf2_sha512.hash(password)
+
+        return
 
     def verify_password(self, password):
         """
@@ -295,7 +301,7 @@ class User(db.Model, UserMixin):
 
     @property
     def has_password(self):
-        return (self.crypt is not None) and self.crypt != '' and self.crypt[0] != '!'
+        return self.crypt not in [None, ''] and self.crypt[0] != '!'
 
     def __repr__(self):
         return '{}'.format(self.username)

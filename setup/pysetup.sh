@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 ln -s venv/bin/activate
 
 
-echo "export FLASK_CONFIG=development; export FLASK_APP=run.py; export PYTHONPATH=${PYTHONPATH}:$(pwd))" >> activate
+echo "export FLASK_CONFIG=development; export FLASK_APP=run.py; export PYTHONPATH=${PYTHONPATH}:$(pwd)" >> activate
 
 # Prepare the config files for uwsgi and nginx
 sed "s/###dir###/$(pwd)/" doc/nginx/veximpy.template > doc/nginx/veximpy

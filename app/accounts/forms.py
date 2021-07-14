@@ -3,7 +3,7 @@
 
 from os import path
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, IntegerField, PasswordField, StringField, SubmitField, TextAreaField
+from wtforms import BooleanField, HiddenField, IntegerField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import EqualTo, Length, NumberRange, Optional
 from wtforms_components import read_only
 from ..lib.forms_fields import TextAreaSepListField
@@ -70,7 +70,7 @@ class AccountFormLocal(FlaskForm):
     def account_save(self, account):
         if self.action in ['add', 'addpostmaster']:
             self.password1.flags.required = True
-        if self.password1.data == '':
+        elif self.password1.data == '':
             del self.password1
             del self.password2
 
@@ -94,22 +94,30 @@ class AccountFormLocal(FlaskForm):
                 account.admin = 1
                 account.role = account.role | settings['ROLE_POSTMASTER']
                 print(account.role)
-            if self.domain.pipe != 1:
+            if self.domain.pipe == 1:
+                if self.smtp.data[0] == '|':
+                    account.type='piped'
+                else:
+                    account.on_pipe = 0
+            else:
                 account.on_pipe = 0
                 account.smtp = path.join(self.domain.maildir, self.localpart.data, 'Maildir')
 
             return True
         return False
 
-    enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
+    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     realname = StringField('Realname', description='', validators=[Length(min=1, max=255)])
     localpart = StringField('Localpart',
-                    description='', validators=[Localpart, Length(min=1, max=255)])
+                    description='This is the part on the left side of the @ character in the mail address.',
+                    validators=[Localpart, Length(min=1, max=255)])
     username = StringField('Username',
                     description='An arbitrary value. If empty the mailaddress of this account will be used.',
                     validators=[Username, Optional(), Length(min=0, max=255)])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
-    password1 = PasswordField('Password', validators=[PasswordRules])
+    password1 = PasswordField('Password',
+                    description='Allowed characters: ' + pwdcharallowed,
+                    validators=[PasswordRules])
     password2 = PasswordField('Confirm Password', validators=[EqualTo('password1',
                     message='Password does not match confirmation password.')])
     uid = IntegerField('System UID', validators=[NumberRange(min=99, max=65535)])
@@ -143,7 +151,8 @@ class AccountFormLocal(FlaskForm):
                     false_values={0, False, 'false', ''})
     on_forward = BooleanField('Enable mail forwarding',
                     false_values={0, False, 'false', ''})
-    forward = TextAreaSepListField('Forward mails to following addresses. One per line.',
+    forward = TextAreaSepListField('Forward mails to following addresses',
+                    description='One address per line',
                     validators=[Length(min=0, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     unseen = BooleanField('Store forwarded mail locally',
                     false_values={0, False, 'false', ''})
@@ -171,7 +180,7 @@ class AccountFormAlias(FlaskForm):
         if domain:
             self.domain = domain
         else:
-            raise ValueError('No domain object in AccountFormLocal.__init__')
+            raise ValueError('No domain object in AccountFormAlias.__init__')
 
         super().__init__(obj=obj)
         self.pwdcharallowed = self.domain.pwd_charallowed
@@ -180,6 +189,7 @@ class AccountFormAlias(FlaskForm):
         if self.action == 'add':
             del self.submitedit
             self.domain_id = self.domain.domain_id
+            self.smtp = ''
         elif self.action == 'addpostmaster':
             raise ValueError('Postmaster can not be an alias account')
         elif self.action == 'edit':
@@ -187,6 +197,8 @@ class AccountFormAlias(FlaskForm):
             self.password1.flags.required = False
             read_only(self.localpart)
             self.localpart.validators = []
+
+        read_only(self.username)
 
         if self.localpart.data == 'postmaster':
             raise ValueError('Postmaster can not be an alias account')
@@ -198,14 +210,16 @@ class AccountFormAlias(FlaskForm):
 
         if self.validate_on_submit():
             self.populate_obj(account)
+            account.admin = False
             account.domain_id = self.domain.domain_id
-            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.pop = self.smtp.data
             account.role = settings['ROLE_USER']
             account.type = 'alias'
+            account.username = self.localpart.data + '@' + self.domain.domain
 
-            if self.username and self.username.data == '':
-                account.username = self.localpart.data + '@' + self.domain.domain
-            if self.password1 and self.password1.data != '':
+            if self.password_remove and self.password_remove.data:
+                account.password_set(None)
+            elif self.password1 and self.password1.data != '':
                 account.password_set(self.password1.data)
 
             return True
@@ -213,22 +227,28 @@ class AccountFormAlias(FlaskForm):
 
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
     realname = StringField('Realname', validators=[Length(min=1, max=255)])
-    localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
-    username = StringField('Username', validators=[Length(min=1, max=255)])
+    localpart = StringField('Localpart',
+                description='This is the part on the left side of the @ character in the mail address.',
+                validators=[Length(min=1, max=255)])
+    username = HiddenField('Username')
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
-    password_remove = BooleanField('Remove Password. Deny Login.', default=bool_checked(), false_values={0, False, 'false', ''})
-    password1 = PasswordField('Password', description='Password only needed if you want the user to be able to log in, or if the Alias is the admin account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
+    password_remove = BooleanField('Remove Password. Deny Login.', false_values={0, False, 'false', ''})
+    #            description='If checked: this overrides the passwordfields below.')
+    password1 = PasswordField('Password',
+                description='Password only needed if you want the user to be able to log in (eg for sendig mail).<br>Allowed characters: ' + pwdcharallowed,
+                validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')
-    admin = BooleanField('Domain Admin', default=0, false_values={0, False, 'false', ''})
-    smtp = TextAreaSepListField('Address', description='Multiple addresses should be comma separated, with no spaces', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
-    on_avscan = BooleanField('Anti virus scan', description='Run anti virus scan on mails.', default=1, false_values={0, False, 'false', ''})
+    smtp = TextAreaSepListField('Forward mails to following addresses',
+                description='One address per line', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
+    on_avscan = BooleanField('Anti virus scan',
+                description='Run anti virus scan on mails.', default=1, false_values={0, False, 'false', ''})
     on_spamassassin = BooleanField('Spam check', description='Run spamassassin on mails.', default=1, false_values={0, False, 'false', ''})
     sa_tag = IntegerField('Tag spam above this score', description='Above this score the "X-Spam-Flag: YES" header will be added.', default=3, validators=[NumberRange(min=0, max=99)])
     sa_refuse = IntegerField('Refuse spam above this score', default=5, validators=[NumberRange(min=0, max=99)])
     spam_drop = BooleanField('Move mails above "refuse score" to Junk folder or if disabled delete it.', default=1, false_values={0, False, 'false', ''})
     submitadd = SubmitField('Add account')
     submitedit = SubmitField('Save account')
-    cancel = SubmitField('Cancel')
+    submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})
 
 
 class AccountFormFail(FlaskForm):
@@ -246,7 +266,7 @@ class AccountFormFail(FlaskForm):
         if domain:
             self.domain = domain
         else:
-            raise ValueError('No domain object in AccountFormLocal.__init__')
+            raise ValueError('No domain object in AccountFormiFail.__init__')
 
         super().__init__(obj=obj)
 
@@ -268,7 +288,8 @@ class AccountFormFail(FlaskForm):
         if self.validate_on_submit():
             self.populate_obj(account)
             account.domain_id = self.domain.domain_id
-            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.smtp=':fail:'
+            account.pop=':fail:'
             account.role = settings['ROLE_USER']
             account.type = 'fail'
             account.username = self.localpart.data + '@' + self.domain.domain
@@ -277,7 +298,10 @@ class AccountFormFail(FlaskForm):
         return False
 
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
-    localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
+    localpart = StringField('Localpart', 
+                description='This is the part on the left side of the @ character in the mail address.',
+                validators=[Length(min=1, max=255)])
+    username = HiddenField('Username')
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     submitadd = SubmitField('Add account')
     submitedit = SubmitField('Save account')
@@ -305,7 +329,7 @@ class AccountFormCatchall(FlaskForm):
         if domain:
             self.domain = domain
         else:
-            raise ValueError('No domain object in AccountFormLocal.__init__')
+            raise ValueError('No domain object in AccountFormCatchall.__init__')
 
         super().__init__(obj=obj)
 
@@ -316,28 +340,29 @@ class AccountFormCatchall(FlaskForm):
             raise ValueError('Postmaster can not be a catchall account')
         elif self.action == 'edit':
             del self.submitadd
-            read_only(self.localpart)
-            self.localpart.validators = []
 
-        if self.localpart.data == 'postmaster':
-            raise ValueError('Postmaster can not be an catchall account')
+        read_only(self.localpart)
+        self.localpart.validators = []
 
     def account_save(self, account):
 
         if self.validate_on_submit():
             self.populate_obj(account)
             account.domain_id = self.domain.domain_id
-            account.pop = path.join(self.domain.maildir, self.localpart.data)
+            account.pop = self.smtp.data
             account.role = settings['ROLE_USER']
-            account.type = 'fail'
-            account.username = self.localpart.data + '@' + self.domain.domain
+            account.type = 'catch'
+            account.username = '*@' + self.domain.domain
 
             return True
         return False
 
-    localpart = StringField('Localpart', validators=[Length(min=1, max=255)])
+    enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
+    localpart = StringField('Localpart', validators=[])
+    username = HiddenField('Username', validators=[Username])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
-    smtp = TextAreaSepListField('Address', description='', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
+    smtp = TextAreaSepListField('Forward mails to following addresses',
+                description='One address per line', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
     submitadd = SubmitField('Add account')
     submitedit = SubmitField('Save account')
     submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})

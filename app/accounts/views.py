@@ -7,7 +7,7 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from markupsafe import Markup
-from .forms import AccountFormLocal, AccountFormAlias #, AccountFormMailinglist
+from .forms import AccountFormLocal, AccountFormAlias, AccountFormFail, AccountFormCatchall #, AccountFormMailinglist
 from . import accounts
 from ..models.models import Domain, User
 from app.app import db
@@ -30,6 +30,8 @@ def accountlist(domainid, accounttype):
 
     if accounttype == 'local':
         accounttype_list = ['local', 'piped']
+    elif accounttype =='catch':
+        return redirect(url_for('accounts.account_add', domainid=domainid, accounttype=accounttype))
     else:
         accounttype_list = [accounttype]
 
@@ -75,6 +77,7 @@ def account_enabled(accountid, accounttype):
 
     return redirect(url_for('accounts.accountlist', _anchor=accountid, domainid=account.domain_id, accounttype=accounttype))
 
+
 @accounts.route('/account_add/<int:domainid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_add/<int:domainid>', defaults={'accounttype': 'local'}, methods=['GET', 'POST'])
 @login_required
@@ -93,17 +96,33 @@ def account_add(domainid, accounttype):
         flash(Markup('We couldn\'t find the domainid <b>' + str(domainid) + '</b>.'), 'error')
 
     account = User(**domain.get_accountdefaults_dict())
-
-    if accounttype == 'local':
+ 
+    if accounttype in ['local', 'piped']:
         form = AccountFormLocal(obj=account, action='add', domain=domain)
     elif accounttype == 'alias':
-        form = AccountFormAlias(action='add', domain=domain)
+        account.smtp = ''
+        form = AccountFormAlias(obj=account, action='add', domain=domain)
+    elif accounttype == 'fail':
+        form = AccountFormFail(obj=account, action='add', domain=domain)
+    elif accounttype == 'catch':
+        try:
+            account = User.query.filter(User.username == '*@' + domain.domain).one()
+            return redirect(url_for('accounts.account_edit', accountid=account.user_id, accounttype=accounttype))
+        except:
+            pass
+        account.localpart = '*'
+        account.username = '*@' + domain.domain
+        account.smtp = ''
+        accountname = account.username
+        form = AccountFormCatchall(obj=account, action='add', domain=domain)
+
     #elif accounttype == 'list':
-    #     form = AccountFormMailinglist(action='add', domain=domain)
+    #     form = AccountFormMailinglist(obj=account, action='add', domain=domain)
 
     #if request.method == 'GET':
         #form.process(MultiDict(domaindefaults))
-    accountname = form.username.data
+    if not accountname:
+         accountname = form.username.data
 
     if request.method == 'POST':
         if form.submitcancel.data:
@@ -118,7 +137,7 @@ def account_add(domainid, accounttype):
                 flash(Markup('Account <b>' + accountname + '</b> already exists.'), 'error')
                 return render_template('accounts/account.html', action='Add',
                                     accountname = '', 
-                                    add_account=add_account, form=AccountFormLocal(obj=account, action='add', domain=domain),
+                                    add_account=add_account, form=form,
                                     domainname=domain.domain,
                                     domainid=domainid,
                                     title='Add ' + accounttype + ' account')
@@ -126,18 +145,20 @@ def account_add(domainid, accounttype):
             flash(Markup('An error occured on adding account <b>' + accountname + '</b> during form data validation.'), 'error')
             return render_template('accounts/account.html', action='Add',
                                     accountname = '', 
-                                    add_account=add_account, form=AccountFormLocal(obj=account, action='add', domain=domain),
+                                    add_account=add_account, form=form,
                                     domainname=domain.domain,
                                     domainid=domainid,
                                     title='Add ' + accounttype + ' account')
         flash(Markup('You have successfully added the account <b>' + accountname + '</b>'), 'success')
         return redirect(url_for('accounts.accountlist', domainid=account.domain_id, accounttype=accounttype))
+
     return render_template('accounts/account.html', action='Add',
                             add_account=add_account, form=form,
                             accountname=accountname,
                             domainname=domain.domain, 
                             domainid=domainid,
                             title='Add ' + accounttype + ' account')
+
 
 @accounts.route('/account_edit/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_edit/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
@@ -155,14 +176,22 @@ def account_edit(accountid, accounttype):
         account = User.query.filter_by(user_id=accountid).one()
         domain = Domain.query.filter_by(domain_id=account.domain_id).one()
 
-        if accounttype == 'local':
+        if accounttype  in ['local', 'piped']:
             form = AccountFormLocal(obj=account, action='edit',  domain=domain)
-            accountname = account.username
+        elif accounttype == 'alias':
+            form = AccountFormAlias(obj=account, action='edit', domain=domain)
+        elif accounttype == 'fail':
+            form = AccountFormFail(obj=account, action='edit', domain=domain)
+        elif accounttype == 'catch':
+            form = AccountFormCatchall(obj=account, action='edit', domain=domain)
+        accountname = account.username
     except NoResultFound:
         flash(Markup('We couldn\'t find the accountid <b>' + str(accountid) + '</b>.'), 'error')
-        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype='local'))
+        if accounttype == 'catch': accounttype='local'
+        return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype=accounttype))
 
     if form.submitcancel.data:
+        if accounttype == 'catch': accounttype='local'
         return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype=accounttype))
 
     if request.method == 'POST':
@@ -172,6 +201,7 @@ def account_edit(accountid, accounttype):
                 db.session.commit()
                 flash(Markup('You have successfully edited the domain <b>' + accountname + '</b>'), 'success')
                 # redirect to accountlist page
+                if accounttype == 'catch': accounttype='local'
                 return redirect(url_for('accounts.accountlist', domainid=account.domain_id, _anchor=accountid, accounttype=accounttype))
             except:
                 db.session.rollback()

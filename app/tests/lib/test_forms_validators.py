@@ -2,6 +2,7 @@
 # This file is part of veximpy
 
 import pytest
+import re
 from flask import url_for
 from app.lib.tests import assert_status_with_message, assert_status_with_flashmessage, ViewTestMixin
 from app.lib.tests_helpers import *
@@ -32,7 +33,7 @@ class TestValidators(ViewTestMixin):
         form = FormString(**{'x': 'short'})
         with pytest.raises(Exception) as excceptioninfo:
             PasswordRules(form, form.x)
-        assert str(excceptioninfo.value) == 'Password too short. Minimum length is 10 characters.'
+        assert re.match(r'^Password\stoo\sshort\.\sMinimum\slength\sis\s\d+\scharacters\.$', str(excceptioninfo.value))
 
         form = FormString(**{'x': 'PASSWORD-!12345'})
         with pytest.raises(Exception) as excceptioninfo:
@@ -58,7 +59,7 @@ class TestValidators(ViewTestMixin):
         with pytest.raises(Exception) as excceptioninfo:
             PasswordRules(form, form.x)
         assert 'Password contains illegal characters.' in str(excceptioninfo.value)
-
+ 
         form = FormString(**{'x': 'vAlId-_ Passw0rd'})
         assert PasswordRules(form, form.x) == None
 
@@ -129,7 +130,7 @@ class TestValidators(ViewTestMixin):
         form = FormString(**{'x': 'invalid " localpart'})
         with pytest.raises(Exception) as excceptioninfo:
             Localpart(form, form.x)
-        assert str(excceptioninfo.value) == 'Localpart contains illegal characters.'
+        assert 'Localpart contains illegal characters.' in str(excceptioninfo.value)
 
         form = FormString(**{'x': 'validlocalpart'})
         assert Localpart(form, form.x) == None
@@ -147,7 +148,7 @@ class TestValidators(ViewTestMixin):
         form = FormString(**{'x': 'siteadmin'})
         with pytest.raises(Exception) as excceptioninfo:
             UsernameExists(form, form.x)
-        assert str(excceptioninfo.value) == 'Account exists.'
+        assert str(excceptioninfo.value) == 'Username exists.'
 
         form = FormString(**{'x': 'does-not-exist-user'})
         assert UsernameExists(form, form.x) == None
