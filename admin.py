@@ -9,19 +9,26 @@ __copyright__ = 'See the file README.md for further information'
 __license__ = 'See the file LICENSE for further information'
 
 import click
-from app.models.siteadminadd import create_siteadmin
+import sys, os
+from app.app import create_app
+from app.models.siteadminadd import create_sitedomain, create_siteadmin, set_siteadminpassword
+
+config_name = os.getenv('FLASK_CONFIG')
+app = create_app(config_name)
+
 @click.command()
-@click.option('-p', '--password', prompt='New siteadmin password:', hide_input=True, confirmation_prompt=True,
-      help='Sets a new password for the siteadmin user')
-@click.option('-s', '--siteinit',
+@click.option('-p', '--password', prompt='New siteadmin password', prompt_required=False, hide_input=True, confirmation_prompt=True,
+      help='Sets a new password for the siteadmin user.')
+@click.option('-s', '--siteinit', prompt='New siteadmin password', prompt_required=False, hide_input=True, confirmation_prompt=True,
       help='Create site domain and siteadmin account in database.')
 def main(password, siteinit):
-    if password:
-        create_siteadmin(password)
-    elif siteinit:
-        create_siteadmin(password)
-    else:
-        print('something went wrong...')
+        if siteinit:
+            create_sitedomain(app)
+            create_siteadmin(app, siteinit)
+
+        if password:
+            print('PW: ', password)
+            set_siteadminpassword(app, password, None)
 
 
 if __name__ == "__main__":

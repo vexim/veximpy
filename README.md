@@ -27,7 +27,7 @@ In `wsgi.py` set **os.environ['FLASK_CONFIG'] = 'production'**
 
 Create a DB and a DB user. (DB must exist!). Make sure there is no `migrations/` directory.
 
-Shell-Example to create DB `veximtest` and DB user `vximpy`. Additionally i create a DB `veximtest_test` for `pytest` named:
+Shell-Example to create DB `veximtest` and DB user `vximpy`. Additionally (optional) we create a DB `veximtest_test` for `pytest`:
 
 ```
 echo "CREATE USER 'veximpy'@localhost IDENTIFIED BY '<STRONG_PASSWORD>';" | mysql
@@ -40,7 +40,10 @@ echo "FLUSH PRIVILGES;" | mysql
 
 Then simply call: `bash setup/dbinstall.sh <targetDBname>`
 
-This will create tables in the DB <targetDBname> and create the siteadmin user.
+This will create tables in the DB <targetDBname>.
+
+Call `python3 admin.py --siteinit` to create dataase records for the `site` domain and the `siteadmin` user. You will be prompted to provide the password or you can provide it after the password option.
+
 
 If \<targetDBname\> is ommited, 'veximtest' will be used as target DB.
 
@@ -94,6 +97,10 @@ See `app/config/settings.py` for defaults and other variables.
 Under `app/static/ressources` create a directory for every domain in your database with the Logo as SVG. The filename must be `logo.svg`
 
 Eg: `app/static/ressources/example.com/logo.svg`
+
+# Reset the siteadmin password
+
+Call `python3 admin.py --password` to change password for the `siteadmin` user. You will be prompted to provide the password or you can provide it after the password option.
 
 # Automated tests
 
