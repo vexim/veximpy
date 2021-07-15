@@ -358,7 +358,7 @@ class AccountFormCatchall(FlaskForm):
         return False
 
     enabled = BooleanField('Enabled', default=bool_checked(domaindefaults['enabled']), false_values={0, False, 'false', ''})
-    localpart = StringField('Localpart', validators=[])
+    localpart = HiddenField('Localpart', validators=[])
     username = HiddenField('Username', validators=[Username])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     smtp = TextAreaSepListField('Forward mails to following addresses',

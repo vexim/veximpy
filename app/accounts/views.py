@@ -45,7 +45,8 @@ def accountlist(domainid, accounttype):
         title="Accounts", list_title=accountlist_title[accounttype] + " accounts for " + domain.domain,
         postmasterdeleteallow=settings['POSTMASTER_DELETEALLOW'],
         accountlist=accountlist,
-        accounttype=accounttype)
+        accounttype=accounttype,
+        domainname=domain.domain)
 
 @accounts.route('/account_enabled/<int:accountid>/<accounttype>', methods=['GET', 'POST'])
 @accounts.route('/account_enabled/',  defaults={'accountid': 0, 'accounttype': 'local'}, methods=['GET', 'POST'])
@@ -89,6 +90,7 @@ def account_add(domainid, accounttype):
     """
 
     add_account = True
+    accountname = None
 
     try:
         domain = Domain.query.filter(Domain.domain_id == domainid).one()

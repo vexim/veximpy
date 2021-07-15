@@ -176,7 +176,7 @@ class Group(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     __table_args__ = (
-        db.Index('username', 'localpart', 'domain_id'),
+        db.Index('locallpart_domainid', 'localpart', 'domain_id'),
         {'mysql_row_format': 'DYNAMIC'}
     )
 

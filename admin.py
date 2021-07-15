@@ -24,11 +24,16 @@ app = create_app(config_name)
 def main(password, siteinit):
         if siteinit:
             create_sitedomain(app)
-            create_siteadmin(app, siteinit)
-
+            try:
+                create_siteadmin(app, siteinit)
+            except:
+                print('Error during creation of siteadmin.')
         if password:
-            print('PW: ', password)
-            set_siteadminpassword(app, password, None)
+            try:
+                set_siteadminpassword(app, password, None)
+                print('New password set.')
+            except:
+                print('New password not set.')
 
 
 if __name__ == "__main__":

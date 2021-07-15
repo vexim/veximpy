@@ -6,13 +6,20 @@ from sqlalchemy.sql import label
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from app.models.models import Domain, User
 from app.app import db, create_app
-from app.config.settings import sitedomaindefaults, siteadmindefaults
+from app.config.settings import settings, sitedomaindefaults, siteadmindefaults
+from app.lib.validators import passwordCheck
 
 #config_name = os.getenv('FLASK_CONFIG')
 #app = create_app(config_name)
 
 # set password for siteadmin
 def set_siteadminpassword(app, password, account=None):
+    
+    pwdchk = passwordCheck(password, lengthmin=settings['PWDLENGTHMIN'], charallowed=settings['PWDCHARSALLOWED'])
+    if pwdchk:
+        print(pwdchk)
+        return
+
     with app.app_context():
         if not account:
             try:
@@ -40,6 +47,11 @@ def create_sitedomain(app):
     
 # create siteadmin user and domain
 def create_siteadmin(app, siteadmin_password):
+    pwdchk = passwordCheck(password, lengthmin=settings['PWDLENGTHMIN'], charallowed=settings['PWDCHARSALLOWED'])
+    if pwdchk:
+        print(pwdchk)
+        return
+
     with app.app_context():
         try:
             account = db.session.query(User).filter(User.user_id == 1).one()
