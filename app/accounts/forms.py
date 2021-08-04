@@ -8,7 +8,7 @@ from wtforms.validators import EqualTo, Length, NumberRange, Optional
 from wtforms_components import read_only
 from ..lib.forms_fields import TextAreaSepListField
 from ..lib.forms_functions import bool_checked
-from ..lib.forms_validators import Localpart, Username, PasswordRules
+from ..lib.forms_validators import Localpart, Username, PasswordRules, MailAddressList
 from ..models.models import Domain #, User
 from ..config.settings import domaindefaults, postmasterdefaults, settings
 
@@ -153,7 +153,9 @@ class AccountFormLocal(FlaskForm):
                     false_values={0, False, 'false', ''})
     forward = TextAreaSepListField('Forward mails to following addresses',
                     description='One address per line',
-                    validators=[Length(min=0, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
+                    validators=[Length(min=0, max=4096), MailAddressList],
+                    separator=',',
+                    render_kw={"rows": 5, "cols": 255})
     unseen = BooleanField('Store forwarded mail locally',
                     false_values={0, False, 'false', ''})
     on_vacation = BooleanField('Enable vacation message. Automatic reply.',
@@ -212,7 +214,7 @@ class AccountFormAlias(FlaskForm):
             self.populate_obj(account)
             account.admin = False
             account.domain_id = self.domain.domain_id
-            account.pop = self.smtp.data
+            account.pop = self.smtp
             account.role = settings['ROLE_USER']
             account.type = 'alias'
             account.username = self.localpart.data + '@' + self.domain.domain
@@ -239,7 +241,10 @@ class AccountFormAlias(FlaskForm):
                 validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
     password2 = PasswordField('Confirm Password')
     smtp = TextAreaSepListField('Forward mails to following addresses',
-                description='One address per line', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
+                description='One address per line',
+                validators=[Length(min=1, max=4096), MailAddressList],
+                separator=', ',
+                render_kw={"rows": 5, "cols": 255})
     on_avscan = BooleanField('Anti virus scan',
                 description='Run anti virus scan on mails.', default=1, false_values={0, False, 'false', ''})
     on_spamassassin = BooleanField('Spam check', description='Run spamassassin on mails.', default=1, false_values={0, False, 'false', ''})
@@ -362,7 +367,10 @@ class AccountFormCatchall(FlaskForm):
     username = HiddenField('Username', validators=[Username])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     smtp = TextAreaSepListField('Forward mails to following addresses',
-                description='One address per line', validators=[Length(min=1, max=4096)], separator=', ', render_kw={"rows": 5, "cols": 255})
+                description='One address per line',
+                validators=[Length(min=1, max=4096), MailAddressList],
+                separator=', ',
+                render_kw={"rows": 5, "cols": 255})
     submitadd = SubmitField('Add account')
     submitedit = SubmitField('Save account')
     submitcancel = SubmitField('Cancel', render_kw={'formnovalidate': True})

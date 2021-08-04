@@ -8,9 +8,8 @@ import string
 pwdchars_lig = 'öäüÖÄÜß'
 
 settings = {
-    'USERNAMES_SITEWIDE': 0,            # allow sitewide unique usernames (without domainpart)
     'CHECK_RCPT_REMOTE_LOCALPARTS': '', # a regex for matching usernames/mailaddresses. see exim4 CHECK_RCPT_REMOTE_LOCALPARTS
-    # right now the RFC is stupid - https://tools.ietf.org/html/rfc6530#section-7.1 - it allowes a lot more characters
+    # right now the RFC is stupid - https://tools.ietf.org/html/rfc6530#section-7.1 - it allows a lot more characters
     # this is default but add what you think your yousers need. eg: !#$%&'*+-/=?^_`{|}~;
     # eMail addresses are _not_ case sensitive. even some $$$-companies believe the oposite.
     'USERNAMES_CHARSALLOWED': string.ascii_lowercase + string.digits + "@!#$%&*+-/=?^_{|}~.",
@@ -34,8 +33,9 @@ settings = {
     'SITEADMIN_ALLOWMANAGEACCOUNTS': 1, # allow siteadmins to manage accounts
     
     'ROLE_SITEADMIN':   0b1000000000000000,   # int 32896
-    'ROLE_POSTMASTER':          0b10000000,   # int 128'
-    'ROLE_USER':                0b00000000,   # int 0'
+    'ROLE_POSTMASTER':          0b10000000,   # int 128
+    'ROLE_PIPEALLOW':           0b01000000,   # int 64,   allow pipe to command in smtp
+    'ROLE_USER':                0b00000000,   # int 0
 }
 
 """

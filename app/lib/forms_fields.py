@@ -19,7 +19,6 @@ class TextAreaSepListField(Field):
     def __init__(self, label='', validators=None, separator=',', **kwargs):
         super(TextAreaSepListField, self).__init__(label, validators, **kwargs)
         self.separator = separator
-        #self.process_formdata(self.raw_data)
 
     widget = TextArea()
 
@@ -31,9 +30,9 @@ class TextAreaSepListField(Field):
         Strip empty lines
         """
         if self.data:
-            return '\n'.join([_.strip() for _ in self.data.replace(' ', '').split(self.separator.strip()) if _.strip()])
+            return u'\n'.join([_.strip() for _ in self.data.replace(' ', '').split(self.separator.strip()) if _.strip()])
         else:
-            return ''
+            return u''
 
     def process_formdata(self, valuelist):
         """

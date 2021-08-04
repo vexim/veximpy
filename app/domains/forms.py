@@ -7,7 +7,7 @@ from wtforms import BooleanField, IntegerField, PasswordField, SelectField, Stri
 from wtforms_components import read_only
 from wtforms.validators import DataRequired, EqualTo, IPAddress, Length, NumberRange, Optional
 from ..lib.forms_fields import TextAreaSepListField
-from ..lib.forms_validators import IPList, PasswordRules, URI, DomainExists, QuotaDomains
+from ..lib.forms_validators import IPList, PasswordRules, MX, DomainExists, QuotaDomains
 from ..config.settings import domaindefaults, settings
 
 class DomainFormLocal(FlaskForm):
@@ -49,7 +49,7 @@ class DomainFormLocal(FlaskForm):
     pwdlengthmin = settings['PWDLENGTHMIN']
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
-    domain = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
+    domain = StringField('Domain', validators=[Length(min=3, max=255), MX, DomainExists])
     comment = StringField('Comment', validators=[Optional(), Length(min=0, max=255)])
     maildir = StringField('Maildir base path. Domain name will be appended.', description='You can <b>not</b> change this later.', validators=[Length(min=3, max=4096)])
     password1 = PasswordField('Password for postmaster account', validators=[PasswordRules, EqualTo('password2', message='Password does not match confirmation password.')])
@@ -103,7 +103,7 @@ class DomainFormAlias(FlaskForm):
         return False
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
-    alias = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
+    alias = StringField('Domain', validators=[Length(min=3, max=255), MX, DomainExists])
     domain_id = SelectField('Redirect mails to', coerce=int)
     host_smtp = StringField('SMTP host', validators=[DataRequired(), Length(min=2, max=64)])
     host_imap = StringField('IMAP host', validators=[DataRequired(), Length(min=2, max=64)])
@@ -134,7 +134,7 @@ class DomainFormRelay(FlaskForm):
         return False
 
     enabled = BooleanField('Enabled', false_values={0, False, 'false', ''})
-    domain = StringField('Domain', validators=[Length(min=3, max=255), URI, DomainExists])
+    domain = StringField('Domain', validators=[Length(min=3, max=255), MX, DomainExists])
     submitadd = SubmitField('Add domain')
     submitedit = SubmitField('Save domain')
     submitcancel = SubmitField('Cancel')

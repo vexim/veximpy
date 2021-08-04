@@ -176,7 +176,7 @@ class Group(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     __table_args__ = (
-        db.Index('locallpart_domainid', 'localpart', 'domain_id'),
+        db.Index('localpart_domainid', 'localpart', 'domain_id'),
         {'mysql_row_format': 'DYNAMIC'}
     )
 
@@ -245,6 +245,10 @@ class User(db.Model, UserMixin):
         if self.role & settings['ROLE_POSTMASTER'] == settings['ROLE_POSTMASTER']:
             return self.domain_id
         return 0
+
+    @property
+    def is_pipeallow(self):
+        return(self.role & settings['ROLE_PIPEALLOW'] == settings['ROLE_PIPEALLOW'])
 
     @property
     def is_deleteable(self):

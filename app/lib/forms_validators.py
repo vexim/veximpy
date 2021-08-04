@@ -7,6 +7,7 @@ Functions:
 #import string
 import logging
 import validators
+import re
 from dns.resolver import resolve, NXDOMAIN
 from dns.exception import DNSException
 from wtforms import ValidationError
@@ -20,8 +21,6 @@ def PasswordRules(form, field):
     Password length
     Allowed characters
     """
-    #val_msg = []
-    #val_fail = False
 
     if field.data:
         checkresult = passwordCheck(field.data, lengthmin=form.pwdlengthmin, charallowed=form.pwdcharallowed)
@@ -33,39 +32,6 @@ def PasswordRules(form, field):
         logging.debug('Empty password is not allowed.')
         raise ValidationError('Empty password is not allowed.')
 
-def ignore():
-
-    if hasattr(form, 'pwd_lengthmin'):
-        if len(field.data) < form.pwd_lengthmin.data:
-            logging.debug('Function PasswordRules. Password too short')
-            raise ValidationError('Password too short. Minimum length is 10 characters.')
-    elif len(field.data) < form.pwdlengthmin:
-        logging.debug('Function PasswordRules. Password too short')
-        raise ValidationError('Password too short. Minimum length is 10 characters.')
-
-    if (domaindefaults['pwd_rules'] & settings['PWDRULES_LOWER']):
-        val_msg.append('lower case')
-        val_fail = val_fail | (not any(_.islower() for _ in field.data))
-
-    if (domaindefaults['pwd_rules'] & settings['PWDRULES_UPPER']):
-        val_msg.append('upper case')
-        val_fail = val_fail | (not any(_.isupper() for _ in field.data))
-
-    if (domaindefaults['pwd_rules'] & settings['PWDRULES_DIGIT']):
-        val_msg.append('digits')
-        val_fail = val_fail | (not any(_.isdigit() for _ in field.data))
-
-    if (domaindefaults['pwd_rules'] & settings['PWDRULES_NONALPHA']):
-        val_msg.append('special characters')
-        val_fail = val_fail | (not any((not _.isalnum() or _ in settings['PWDCHARSLIG']) for _ in field.data))
-
-    if val_fail:
-        logging.debug('Function PasswordRules. Missing char group')
-        raise ValidationError('Password must contain characters of all of following groups: ' + ', '.join(val_msg) + '.')
-
-    if any(not (_ in (form.pwdcharallowed)) for _ in field.data):
-        logging.debug('Function PasswordRules. illegal characters')
-        raise ValidationError('Password contains illegal characters. Allowed characters: ' + form.pwdcharallowed)
 
 def IPList(form, field):
     """
@@ -75,14 +41,15 @@ def IPList(form, field):
     """
     invalidip = ''
     if field.data:
-        for _ in field.data.split(';'):
+        for _ in field.data.split(field.separator):
             if not (validators.ip_address.ipv4(_.strip()) or validators.ip_address.ipv6(_.strip())):
                 invalidip += _.strip() + ', '
     if invalidip != '':
         logging.debug('Function IPList. Invalid IP address')
         raise ValidationError('Invalid IP address: ' + invalidip[:-2])
 
-def URI(form, field):
+
+def MX(form, field):
     """
     Check if the domainname is syntactically valid
     and if an MX record is found
@@ -90,17 +57,63 @@ def URI(form, field):
     if field.data is None:
         return
     if (not validators.domain(field.data.strip())) or ('_' in field.data):
-        logging.debug('Function URI. Invalid domain name')
+        logging.debug('Function MX. Invalid domain name')
         raise ValidationError('Invalid domain name.')
     else:
         try:
             resolve(field.data, 'MX')
         except NXDOMAIN as e:
-            logging.debug('Function URI. No DNS MX record found', e)
+            logging.debug('Function MX. No DNS MX record found', e)
             raise ValidationError('No DNS MX record found.')
         except DNSException as e:
-            logging.debug('Function URI. DNS error ', e)
+            logging.debug('Function MX. DNS error ', e)
             raise ValidationError('DNS error.')
+
+def MailAddressList(form, field):
+    """
+    eMailAddress validator for TextAreaSemicolonSepListField
+    which saves values ',' separated
+    Check localpart syntax and domain
+    """
+    invalidaddr = ''
+    localpart_regex = re.compile(
+        # dot-atom
+        r"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+"
+        r"(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*$"
+        # quoted-string
+        r'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|'
+        r"""\\[\001-\011\013\014\016-\177])*"$)""",
+        re.IGNORECASE)
+    domain_regex = re.compile(
+        # domain
+        r'(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+'
+        r'(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?$)'
+        # literal form, ipv4 address (SMTP 4.1.3)
+        r'|^\[(25[0-5]|2[0-4]\d|[0-1]?\d?\d)'
+        r'(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}\]$',
+        re.IGNORECASE)
+    if field.data:
+        for _line in field.data.split(field.separator):
+
+            if not _line or '@' not in _line:
+                invalidaddr = _line
+            else:
+                localpart, domain = _line.rsplit('@', 1)
+                
+            if not localpart_regex.match(localpart.strip()) or not domain_regex.match(domain.strip()):
+                invalidaddr += _line.strip() + ', '
+            else:
+                try:
+                    resolve(domain, 'MX')
+                except NXDOMAIN as e:
+                        invalidaddr += _line.strip() + ' (No DNS MX record found), '
+                except DNSException as e:
+                        invalidaddr += _line.strip() + ' (DNS Error), '
+
+    if invalidaddr != '':
+        logging.debug('Function MailAddrList. Invalid eMailAddress')
+        raise ValidationError('Invalid eMail addresses: ' + invalidaddr[:-2])
+
 
 def Username(form, field):
     """

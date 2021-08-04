@@ -77,19 +77,19 @@ class TestValidators(ViewTestMixin):
         form = FormTextAreaSepListField(**{'x': '127.0.0.1 ; 2001::1'})
         assert IPList(form, form.x) == None
 
-    def test_validatorsURI(self):
+    def test_validatorsMX(self):
         form = FormTextAreaSepListField(**{'x': 'invalid?domain=.name'})
         with pytest.raises(Exception) as excceptioninfo:
-            URI(form, form.x)
+            MX(form, form.x)
         assert str(excceptioninfo.value) == 'Invalid domain name.'
 
         form = FormTextAreaSepListField(**{'x': '000.example.com'})
         with pytest.raises(Exception) as excceptioninfo:
-            URI(form, form.x)
+            MX(form, form.x)
         assert str(excceptioninfo.value) == 'No DNS MX record found.'
 
         form = FormTextAreaSepListField(**{'x': 'runout.at'})
-        assert URI(form, form.x) == None
+        assert MX(form, form.x) == None
 
     def test_validatorsUsername(self):
         form = FormString(**{'x': 'test@localpart', 'localpart': 'testlocalpart'})
