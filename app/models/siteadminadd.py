@@ -47,7 +47,7 @@ def create_sitedomain(app):
     
 # create siteadmin user and domain
 def create_siteadmin(app, siteadmin_password):
-    pwdchk = passwordCheck(password, lengthmin=settings['PWDLENGTHMIN'], charallowed=settings['PWDCHARSALLOWED'])
+    pwdchk = passwordCheck(siteadmin_password, lengthmin=settings['PWDLENGTHMIN'], charallowed=settings['PWDCHARSALLOWED'])
     if pwdchk:
         print(pwdchk)
         return
