@@ -5,6 +5,10 @@ Use this code on your own risk!
 
 If you get some `Duplicate index` warnings - ignore them.
 
+## Requirements
+
+Debian Bookworm for `sqlalchemy` >=1.4.
+
 ## Install Python3 environment
 
 Create and cd to a directory where you want to install veximpy
